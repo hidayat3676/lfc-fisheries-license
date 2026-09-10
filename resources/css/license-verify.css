@@ -1,0 +1,81 @@
+/* ============================================================
+   KP Fisheries E-License — Public License Verification Styles
+   ============================================================ */
+
+.verify-status-card {
+    background: #ffffff;
+    border-radius: var(--rflms-radius);
+    border: 1px solid var(--rflms-border);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+}
+
+.verify-badge-valid {
+    background: linear-gradient(135deg, #0b6e4f, #064a35);
+    color: #ffffff;
+}
+
+.verify-badge-expired {
+    background: linear-gradient(135deg, #c0392b, #962d22);
+    color: #ffffff;
+}
+
+.verify-badge-cancelled {
+    background: linear-gradient(135deg, #4a5568, #2d3748);
+    color: #ffffff;
+}
+
+.verify-avatar {
+    width: 76px;
+    height: 76px;
+    border-radius: 16px;
+    border: 3px solid #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    object-fit: cover;
+    background: #e2e8f0;
+    flex-shrink: 0;
+}
+
+.verify-detail-item {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+    transition: all 0.2s ease;
+}
+
+.verify-detail-item:hover {
+    background: #ffffff;
+    border-color: var(--rflms-primary);
+    box-shadow: 0 4px 12px rgba(11,110,79,0.06);
+}
+
+.verify-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748b;
+    margin-bottom: 2px;
+}
+
+.verify-value {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.verify-watermark {
+    position: absolute;
+    right: -20px;
+    bottom: -20px;
+    font-size: 9rem;
+    opacity: 0.04;
+    pointer-events: none;
+    color: #0b6e4f;
+}
+
+@media print {
+    .no-print { display: none !important; }
+    body { background: #fff !important; }
+    .verify-status-card { box-shadow: none !important; border: 1px solid #cbd5e1 !important; }
+}
