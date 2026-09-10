@@ -12,7 +12,7 @@ class LicenseCardController extends Controller
     public function __invoke(Request $request, License $license): View
     {
         abort_unless($license->user_id === $request->user()->id, 403);
-        $license->load(['user.citizenProfile', 'reservoir.district', 'category']);
+        $license->load(['application', 'user.citizenProfile', 'reservoir.district', 'category']);
 
         return view('citizen.licenses.card', compact('license'));
     }

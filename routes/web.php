@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\ApplicationController as AdminApplicationController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\GroupController;
 use App\Http\Controllers\Admin\LicenseCategoryController;
 use App\Http\Controllers\Admin\OfficeController;
 use App\Http\Controllers\Admin\ReportController;
@@ -106,6 +107,21 @@ Route::middleware(['auth', EnsureStaff::class])->prefix('admin')->name('admin.')
     Route::middleware('module:users,edit')->group(function () {
         Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+    });
+
+    Route::middleware('module:groups,view')->group(function () {
+        Route::get('/groups', [GroupController::class, 'index'])->name('groups.index');
+    });
+    Route::middleware('module:groups,create')->group(function () {
+        Route::get('/groups/create', [GroupController::class, 'create'])->name('groups.create');
+        Route::post('/groups', [GroupController::class, 'store'])->name('groups.store');
+    });
+    Route::middleware('module:groups,edit')->group(function () {
+        Route::get('/groups/{group}/edit', [GroupController::class, 'edit'])->name('groups.edit');
+        Route::put('/groups/{group}', [GroupController::class, 'update'])->name('groups.update');
+    });
+    Route::middleware('module:groups,delete')->group(function () {
+        Route::delete('/groups/{group}', [GroupController::class, 'destroy'])->name('groups.destroy');
     });
 
     Route::middleware('module:offices,view')->group(function () {

@@ -89,6 +89,11 @@ class User extends Authenticatable
         return $this->belongsToMany(Office::class, 'user_offices')->withTimestamps();
     }
 
+    public function groups(): BelongsToMany
+    {
+        return $this->belongsToMany(Group::class, 'group_user')->withTimestamps();
+    }
+
     public function modulePermissions(): HasMany
     {
         return $this->hasMany(UserModulePermission::class);
@@ -128,6 +133,20 @@ class User extends Authenticatable
             return false;
         }
 
+        // Check permissions via active assigned groups
+        $hasGroupPermission = $this->groups()
+            ->where('is_active', true)
+            ->whereHas('modulePermissions', function ($q) use ($moduleKey, $column) {
+                $q->whereHas('module', fn ($m) => $m->where('key', $moduleKey)->where('is_active', true))
+                    ->where($column, true);
+            })
+            ->exists();
+
+        if ($hasGroupPermission) {
+            return true;
+        }
+
+        // Fallback to legacy direct user permissions
         return $this->modulePermissions()
             ->whereHas('module', fn ($q) => $q->where('key', $moduleKey)->where('is_active', true))
             ->where($column, true)

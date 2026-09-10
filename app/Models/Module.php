@@ -25,4 +25,9 @@ class Module extends Model
     {
         return $this->hasMany(UserModulePermission::class);
     }
+
+    public function groupPermissions(): HasMany
+    {
+        return $this->hasMany(GroupModulePermission::class);
+    }
 }

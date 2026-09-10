@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreStaffUserRequest;
 use App\Http\Requests\Admin\UpdateStaffUserRequest;
 use App\Models\District;
+use App\Models\Group;
 use App\Models\Module;
 use App\Models\Office;
 use App\Models\User;
@@ -21,7 +22,7 @@ class UserController extends Controller
     {
         $users = User::query()
             ->whereIn('user_type', [User::TYPE_SUPER_ADMIN, User::TYPE_ADMIN, User::TYPE_EXECUTIVE])
-            ->with(['adminProfile', 'districts', 'offices', 'modulePermissions.module'])
+            ->with(['adminProfile', 'districts', 'offices', 'groups', 'modulePermissions.module'])
             ->when($request->filled('q'), function ($q) use ($request) {
                 $term = '%'.$request->string('q').'%';
                 $q->where(function ($inner) use ($term) {
@@ -47,10 +48,12 @@ class UserController extends Controller
             ]),
             'districts' => District::query()->where('is_active', true)->orderBy('name')->get(),
             'offices' => Office::query()->where('is_active', true)->with('district')->orderBy('name')->get(),
+            'groups' => Group::query()->where('is_active', true)->with('modulePermissions.module')->orderBy('name')->get(),
             'modules' => Module::query()->where('is_active', true)->orderBy('sort_order')->get(),
             'actions' => config('rflms.actions'),
             'selectedDistrictIds' => [],
             'selectedOfficeIds' => [],
+            'selectedGroupIds' => [],
             'permissionMap' => [],
             'permissionTemplates' => $this->permissionTemplatesPayload(),
             'mode' => 'create',
@@ -102,7 +105,7 @@ class UserController extends Controller
     {
         $this->ensureStaffUser($user);
 
-        $user->load(['adminProfile', 'districts', 'offices', 'modulePermissions']);
+        $user->load(['adminProfile', 'districts', 'offices', 'groups', 'modulePermissions']);
 
         $permissionMap = [];
         foreach ($user->modulePermissions as $perm) {
@@ -120,10 +123,12 @@ class UserController extends Controller
             'user' => $user,
             'districts' => District::query()->where('is_active', true)->orderBy('name')->get(),
             'offices' => Office::query()->where('is_active', true)->with('district')->orderBy('name')->get(),
+            'groups' => Group::query()->where('is_active', true)->with('modulePermissions.module')->orderBy('name')->get(),
             'modules' => Module::query()->where('is_active', true)->orderBy('sort_order')->get(),
             'actions' => config('rflms.actions'),
             'selectedDistrictIds' => $user->districts->pluck('id')->all(),
             'selectedOfficeIds' => $user->offices->pluck('id')->all(),
+            'selectedGroupIds' => $user->groups->pluck('id')->all(),
             'permissionMap' => $permissionMap,
             'permissionTemplates' => $this->permissionTemplatesPayload(),
             'mode' => 'edit',
@@ -200,6 +205,7 @@ class UserController extends Controller
         if ($user->user_type === User::TYPE_SUPER_ADMIN) {
             $user->districts()->sync([]);
             $user->offices()->sync([]);
+            $user->groups()->sync([]);
             $user->modulePermissions()->delete();
 
             return;
@@ -212,6 +218,9 @@ class UserController extends Controller
 
         $officeIds = array_map('intval', $data['offices'] ?? []);
         $user->offices()->sync($officeIds);
+
+        $groupIds = array_map('intval', $data['groups'] ?? []);
+        $user->groups()->sync($groupIds);
 
         $user->modulePermissions()->delete();
         $permissions = $data['permissions'] ?? [];

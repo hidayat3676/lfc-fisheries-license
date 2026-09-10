@@ -53,6 +53,13 @@
                             @else
                                 <span class="badge text-bg-secondary">Admin</span>
                             @endif
+                            @if ($user->groups->isNotEmpty())
+                                <div class="d-flex flex-wrap gap-1 mt-1">
+                                    @foreach ($user->groups as $grp)
+                                        <span class="badge bg-secondary-subtle text-dark border" style="font-size: 0.68rem;">{{ $grp->name }}</span>
+                                    @endforeach
+                                </div>
+                            @endif
                         </td>
                         <td class="small">
                             @if ($user->isSuperAdmin() || $user->all_districts)

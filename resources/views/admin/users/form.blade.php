@@ -171,18 +171,7 @@
         </div>
 
         <div class="col-lg-7">
-            <div class="bg-white rounded-4 shadow-sm p-4 mb-3" x-show="!isSuper">
-                <h2 class="h6 fw-bold mb-2">Permission template</h2>
-                <p class="small text-secondary mb-3">Apply a preset, then adjust districts / checkboxes if needed.</p>
-                <div class="d-flex flex-wrap gap-2 mb-2">
-                    <template x-for="(tpl, key) in templates" :key="key">
-                        <button type="button" class="btn btn-sm btn-outline-secondary"
-                                @click="applyTemplate(key)"
-                                x-text="tpl.label"></button>
-                    </template>
-                </div>
-                <p class="small text-secondary mb-0" x-text="templateHint"></p>
-            </div>
+
 
             <div class="bg-white rounded-4 shadow-sm p-4 mb-3" x-show="!isSuper">
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -269,40 +258,66 @@
             </div>
 
             <div class="bg-white rounded-4 shadow-sm p-4" x-show="!isSuper">
-                <h2 class="h6 fw-bold mb-3">Module permissions</h2>
-                <div class="table-responsive">
-                    <table class="table table-sm align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th>Module</th>
-                                @foreach ($actions as $action)
-                                    <th class="text-center small">{{ $actionLabels[$action] ?? $action }}</th>
-                                @endforeach
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($modules as $module)
-                                @php
-                                    $row = old('permissions.'.$module->id, $permissionMap[$module->id] ?? []);
-                                @endphp
-                                <tr>
-                                    <td class="small fw-semibold">{{ $module->name }}</td>
-                                    @foreach ($actions as $action)
-                                        <td class="text-center">
-                                            <input type="checkbox"
-                                                   class="form-check-input perm-box"
-                                                   data-module-id="{{ $module->id }}"
-                                                   data-action="{{ $action }}"
-                                                   name="permissions[{{ $module->id }}][{{ $action }}]"
-                                                   value="1"
-                                                   @checked(! empty($row[$action]))>
-                                        </td>
-                                    @endforeach
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <div>
+                        <h2 class="h6 fw-bold mb-0">Assigned Groups &amp; Roles</h2>
+                        <span class="small text-secondary">Assign one or multiple groups to grant module permissions</span>
+                    </div>
+                    @if (auth()->user()->hasModuleAction('groups', 'create') || auth()->user()->isSuperAdmin())
+                        <a href="{{ route('admin.groups.create') }}" target="_blank" class="btn btn-sm btn-outline-rflms">
+                            <i class="bi bi-plus-circle me-1"></i> New Group
+                        </a>
+                    @endif
                 </div>
+
+                @if ($groups->isEmpty())
+                    <div class="text-center py-4 text-muted border rounded-3 bg-light">
+                        <i class="bi bi-people fs-3 d-block mb-1 text-secondary"></i>
+                        <span class="small fw-medium">No groups created yet.</span>
+                        <div class="mt-2">
+                            <a href="{{ route('admin.groups.create') }}" class="btn btn-sm btn-rflms">Create a Group</a>
+                        </div>
+                    </div>
+                @else
+                    <div class="d-flex flex-column gap-2">
+                        @foreach ($groups as $grp)
+                            <label class="border rounded-3 p-3 d-flex align-items-start gap-3 cursor-pointer bg-light-subtle hover-shadow transition-all mb-0" for="group_{{ $grp->id }}">
+                                <input class="form-check-input mt-1 flex-shrink-0" type="checkbox" name="groups[]"
+                                       id="group_{{ $grp->id }}" value="{{ $grp->id }}"
+                                       @checked(in_array($grp->id, old('groups', $selectedGroupIds ?? [])))>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-1">
+                                        <span class="fw-bold text-dark">{{ $grp->name }}</span>
+                                        <span class="badge bg-secondary-subtle text-secondary border px-2 py-0.5" style="font-size: 0.72rem;">
+                                            {{ $grp->modulePermissions->count() }} {{ Str::plural('module', $grp->modulePermissions->count()) }} configured
+                                        </span>
+                                    </div>
+                                    @if ($grp->description)
+                                        <p class="small text-secondary mb-1 mt-0.5">{{ $grp->description }}</p>
+                                    @endif
+                                    <div class="d-flex flex-wrap gap-1 mt-1">
+                                        @foreach ($grp->modulePermissions as $gp)
+                                            @php
+                                                $acts = [];
+                                                if ($gp->can_view) $acts[] = 'v';
+                                                if ($gp->can_create) $acts[] = 'c';
+                                                if ($gp->can_edit) $acts[] = 'e';
+                                                if ($gp->can_delete) $acts[] = 'd';
+                                                if ($gp->can_status) $acts[] = 's';
+                                                if ($gp->can_approve) $acts[] = 'a';
+                                            @endphp
+                                            @if (!empty($acts))
+                                                <span class="badge bg-white text-muted border font-monospace" style="font-size: 0.65rem;" title="{{ implode(', ', $acts) }}">
+                                                    {{ $gp->module?->name }} [{{ implode(',', $acts) }}]
+                                                </span>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </label>
+                        @endforeach
+                    </div>
+                @endif
             </div>
         </div>
     </div>

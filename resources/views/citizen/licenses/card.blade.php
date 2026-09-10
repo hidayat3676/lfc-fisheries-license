@@ -661,15 +661,26 @@
                             </div>
                         </div>
 
-                        <!-- Bottom Validity Bar -->
-                        <div class="pt-2 border-top d-flex align-items-center justify-content-between mt-auto">
-                            <div>
-                                <span class="field-label d-inline me-1">Issue Date:</span>
-                                <span class="fw-bold small text-dark">{{ $license->issue_date?->format('d M Y') }}</span>
+                        <!-- Validity & Schedule Section -->
+                        <div class="mt-auto">
+                            <!-- Fishing Start Date Row (Above Issue Date) -->
+                            <div class="d-flex align-items-center justify-content-between pb-1">
+                                <div>
+                                    <span class="field-label d-inline me-1">Fishing Start Date:</span>
+                                    <span class="fw-bold small text-dark">{{ ($license->fishing_start_date ?? $license->application?->fishing_start_date ?? $license->issue_date)?->format('d M Y') ?: '—' }}</span>
+                                </div>
                             </div>
-                            <div>
-                                <span class="field-label d-inline me-1">Expiry Date:</span>
-                                <span class="fw-bold small text-danger">{{ $license->expiry_date?->format('d M Y') }}</span>
+
+                            <!-- Issue Date Row -->
+                            <div class="pt-1 border-top d-flex align-items-center justify-content-between">
+                                <div>
+                                    <span class="field-label d-inline me-1">Issue Date:</span>
+                                    <span class="fw-bold small text-dark">{{ $license->issue_date?->format('d M Y') ?: '—' }}</span>
+                                </div>
+                                <div>
+                                    <span class="field-label d-inline me-1">Expiry Date:</span>
+                                    <span class="fw-bold small text-danger">{{ $license->expiry_date?->format('d M Y') ?: '—' }}</span>
+                                </div>
                             </div>
                         </div>
                     </div>

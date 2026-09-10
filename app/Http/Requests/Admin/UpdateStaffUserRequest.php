@@ -46,6 +46,8 @@ class UpdateStaffUserRequest extends FormRequest
             'districts.*' => ['integer', 'exists:districts,id'],
             'offices' => ['nullable', 'array'],
             'offices.*' => ['integer', 'exists:offices,id'],
+            'groups' => ['nullable', 'array'],
+            'groups.*' => ['integer', 'exists:groups,id'],
             'permissions' => ['nullable', 'array'],
             'permissions.*' => ['array'],
             'permissions.*.*' => ['sometimes'],

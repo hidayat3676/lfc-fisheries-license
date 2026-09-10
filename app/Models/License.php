@@ -41,6 +41,11 @@ class License extends Model
         return $this->belongsTo(Application::class);
     }
 
+    public function getFishingStartDateAttribute(): ?\Illuminate\Support\Carbon
+    {
+        return $this->application?->fishing_start_date ?? $this->issue_date;
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
