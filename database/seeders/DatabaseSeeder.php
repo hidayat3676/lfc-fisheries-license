@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\AdminProfile;
-use App\Models\District;
 use App\Models\Module;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -23,22 +22,7 @@ class DatabaseSeeder extends Seeder
             );
         }
 
-        $districtNames = [
-            'Bajaur', 'Bannu', 'Battagram', 'D.I. Khan', 'Dir Lower', 'Dir Upper',
-            'Hangu', 'Haripur', 'Karak', 'Khyber', 'Kohat', 'Lower Chitral',
-            'Malakand', 'Mansehra', 'Mardan', 'North Waziristan', 'Nowshera',
-            'Peshawar', 'Shangla', 'Swabi', 'Swat', 'Upper Chitral',
-        ];
-
-        foreach ($districtNames as $name) {
-            District::query()->updateOrCreate(
-                ['name' => $name],
-                [
-                    'code' => strtoupper(str_replace(['.', ' ', '-'], '', $name)),
-                    'is_active' => true,
-                ]
-            );
-        }
+        $this->call(DistrictSeeder::class);
 
         $super = User::query()->updateOrCreate(
             ['email' => 'superadmin@fisheries.kp.gov.pk'],
