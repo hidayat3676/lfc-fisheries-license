@@ -9,7 +9,10 @@
             <h1 class="h3 fw-bold mb-1">My applications &amp; licences</h1>
             <p class="text-secondary mb-0">Track status and open issued licences</p>
         </div>
-        <a href="{{ route('catalogue.index') }}" class="btn btn-rflms btn-sm">Browse water bodies</a>
+        <div class="d-flex gap-2">
+            <a href="{{ route('reservoirs.index') }}" class="btn btn-outline-secondary btn-sm">Browse water bodies</a>
+            <a href="{{ route('citizen.applications.apply') }}" class="btn btn-rflms btn-sm">Apply for licence</a>
+        </div>
     </div>
 
     @if (session('status'))
@@ -23,7 +26,7 @@
                 <thead class="table-light">
                     <tr>
                         <th>No.</th>
-                        <th>Water body</th>
+                        <th>District</th>
                         <th>Category</th>
                         <th>Status</th>
                         <th></th>
@@ -33,7 +36,7 @@
                     @forelse ($applications as $app)
                         <tr>
                             <td>{{ $app->application_no }}</td>
-                            <td>{{ $app->reservoir?->name }}</td>
+                            <td>{{ $app->reservoir?->district?->name ?: '—' }}</td>
                             <td>{{ $app->category?->name }}</td>
                             <td><span class="badge text-bg-secondary">{{ $app->statusLabel() }}</span></td>
                             <td class="text-end"><a href="{{ route('citizen.applications.show', $app) }}" class="btn btn-sm btn-outline-secondary">View</a></td>
@@ -54,7 +57,7 @@
                 <thead class="table-light">
                     <tr>
                         <th>Licence</th>
-                        <th>Water body</th>
+                        <th>District</th>
                         <th>Valid</th>
                         <th></th>
                     </tr>
@@ -63,7 +66,7 @@
                     @forelse ($licenses as $license)
                         <tr>
                             <td>{{ $license->license_no }}</td>
-                            <td>{{ $license->reservoir?->name }}</td>
+                            <td>{{ $license->reservoir?->district?->name ?: '—' }}</td>
                             <td class="small">{{ $license->issue_date?->format('d M Y') }} → {{ $license->expiry_date?->format('d M Y') }}</td>
                             <td class="text-end">
                                 <a href="{{ route('citizen.licenses.card', $license) }}" class="btn btn-sm btn-rflms">Digital card</a>

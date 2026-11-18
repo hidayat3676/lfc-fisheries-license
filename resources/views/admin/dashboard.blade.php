@@ -17,6 +17,25 @@
     </div>
 </div>
 
+@if (! empty($activeTodayClosures) && $activeTodayClosures->isNotEmpty())
+    <div class="alert alert-warning border-warning d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-shield-slash-fill text-danger fs-4"></i>
+            <div>
+                <strong>Statutory fish breeding closed season is currently in effect:</strong>
+                <span class="text-secondary">
+                    {{ $activeTodayClosures->map(fn ($c) => $c->scopeLabel().' ('.$c->formattedPeriod().')')->join('; ') }}
+                </span>
+            </div>
+        </div>
+        @if (auth()->user()->hasModuleAction('license_categories', 'view') || auth()->user()->hasModuleAction('settings', 'view'))
+            <a href="{{ route('admin.closed-seasons.index') }}" class="btn btn-sm btn-outline-dark">
+                <i class="bi bi-calendar-x me-1"></i> Manage closed seasons
+            </a>
+        @endif
+    </div>
+@endif
+
 <div class="row g-3 mb-4">
     <div class="col-6 col-lg-2">
         <div class="bg-white rounded-4 p-3 h-100 stat-card accent-orange">
@@ -79,6 +98,9 @@
     @if (auth()->user()->hasModuleAction('applications', 'view'))
         <a href="{{ route('admin.applications.index') }}" class="btn btn-rflms btn-sm btn-chip"><i class="bi bi-inbox"></i> Applications</a>
     @endif
+    @if (auth()->user()->hasModuleAction('payments', 'view') || auth()->user()->hasModuleAction('applications', 'view') || auth()->user()->hasModuleAction('settings', 'view'))
+        <a href="{{ route('admin.paymir.index') }}" class="btn btn-outline-secondary btn-sm btn-chip"><i class="bi bi-credit-card-2-front"></i> PAYMIR</a>
+    @endif
     @if (auth()->user()->hasModuleAction('reports', 'view'))
         <a href="{{ route('admin.reports.index') }}" class="btn btn-outline-secondary btn-sm btn-chip"><i class="bi bi-bar-chart"></i> Reports</a>
     @endif
@@ -90,6 +112,9 @@
     @endif
     @if (auth()->user()->hasModuleAction('license_categories', 'view'))
         <a href="{{ route('admin.categories.index') }}" class="btn btn-outline-secondary btn-sm btn-chip"><i class="bi bi-tags"></i> Categories</a>
+    @endif
+    @if (auth()->user()->hasModuleAction('license_categories', 'view') || auth()->user()->hasModuleAction('settings', 'view'))
+        <a href="{{ route('admin.closed-seasons.index') }}" class="btn btn-outline-secondary btn-sm btn-chip"><i class="bi bi-calendar-x"></i> Closed seasons</a>
     @endif
     @if (auth()->user()->hasModuleAction('reservoirs', 'view'))
         <a href="{{ route('admin.reservoirs.index') }}" class="btn btn-outline-secondary btn-sm btn-chip"><i class="bi bi-water"></i> Water bodies</a>

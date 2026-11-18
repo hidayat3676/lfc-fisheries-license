@@ -13,6 +13,28 @@
     @endif
 </div>
 
+<ul class="nav nav-pills mb-3 gap-2">
+    <li class="nav-item">
+        <a class="nav-link active" href="{{ route('admin.categories.index') }}">
+            <i class="bi bi-tags me-1"></i> Licence categories
+        </a>
+    </li>
+    @if (auth()->user()->hasModuleAction('license_categories', 'view') || auth()->user()->hasModuleAction('settings', 'view'))
+        <li class="nav-item">
+            <a class="nav-link bg-white border text-dark" href="{{ route('admin.closed-seasons.index') }}">
+                <i class="bi bi-calendar-x me-1 text-danger"></i> Closed seasons
+            </a>
+        </li>
+    @endif
+    @if (auth()->user()->hasModuleAction('settings', 'view'))
+        <li class="nav-item">
+            <a class="nav-link bg-white border text-dark" href="{{ route('admin.setup.fees') }}">
+                <i class="bi bi-sliders me-1"></i> Policy setup wizard
+            </a>
+        </li>
+    @endif
+</ul>
+
 <div class="bg-white rounded-4 shadow-sm overflow-hidden">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">

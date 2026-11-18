@@ -11,6 +11,7 @@ use App\Models\Reservoir;
 use App\Models\User;
 use App\Services\ApplicationWorkflowService;
 use App\Services\LicensingPolicyService;
+use App\Services\PaymirService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -24,7 +25,7 @@ class ApplicationController extends Controller
     public function index(Request $request): View
     {
         $applications = Application::query()
-            ->with(['user', 'reservoir.district', 'category'])
+            ->with(['user', 'reservoir.district', 'category', 'license'])
             ->forUserDistricts($request->user())
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')))
             ->when($request->filled('q'), function ($q) use ($request) {
@@ -69,16 +70,25 @@ class ApplicationController extends Controller
             ->orderBy('name')
             ->get();
 
+        $scopedIds = $request->user()->scopedDistrictIds();
+        $licensingDistricts = District::query()
+            ->where('is_active', true)
+            ->when($scopedIds !== null, fn ($q) => $q->whereIn('id', $scopedIds))
+            ->with(['reservoirs' => fn ($q) => $q->where('is_active', true)->orderBy('name')])
+            ->orderBy('name')
+            ->get();
+
         return view('admin.applications.create', [
             'citizens' => $citizens,
             'reservoirs' => $reservoirs,
             'categories' => $categories,
             'districts' => $districts,
+            'licensingDistricts' => $licensingDistricts,
             'paymentMethods' => [
                 'counter_cash' => 'Counter Cash Payment (Instant Issue)',
-                'bank_transfer' => 'Online Bank Transfer',
+                '1bill' => 'Online Payment (PAYMIR / 1Bill PSID)',
+                'bank_transfer' => 'Online Bank Transfer (PAYMIR / PSID)',
                 'bank_deposit' => 'Bank Deposit Slip',
-                '1bill' => '1Bill / PSID System',
             ],
         ]);
     }
@@ -86,7 +96,8 @@ class ApplicationController extends Controller
     public function store(
         Request $request,
         LicensingPolicyService $policy,
-        ApplicationWorkflowService $workflow
+        ApplicationWorkflowService $workflow,
+        PaymirService $paymir
     ): RedirectResponse {
         abort_unless($request->user()->hasModuleAction('applications', 'create'), 403);
 
@@ -110,10 +121,11 @@ class ApplicationController extends Controller
             'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
 
             // License application fields
-            'reservoir_id' => ['required', 'integer', 'exists:reservoirs,id'],
+            'district_id' => ['required_without:reservoir_id', 'nullable', 'integer', 'exists:districts,id'],
+            'reservoir_id' => ['nullable', 'integer', 'exists:reservoirs,id'],
             'category_id' => ['required', 'integer', Rule::exists('license_categories', 'id')->where('is_active', true)],
-            'fishing_start_date' => ['required', 'date', 'after_or_equal:today'],
-            'payment_method' => ['required', Rule::in(['counter_cash', 'bank_transfer', 'bank_deposit', '1bill'])],
+            'fishing_start_date' => ['nullable', 'date', 'after_or_equal:today'],
+            'payment_method' => ['required', Rule::in(Application::paymentMethods())],
             'payment_reference' => ['nullable', 'string', 'max:120'],
             'payment_receipt' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
             'auto_approve' => ['nullable', 'boolean'],
@@ -122,11 +134,41 @@ class ApplicationController extends Controller
             'cnic.regex' => 'CNIC must be in format 12345-1234567-1.',
         ]);
 
-        $reservoir = Reservoir::query()->where('is_active', true)->findOrFail($data['reservoir_id']);
-        $this->assertScopedDistrict($request, (int) $reservoir->district_id);
+        if (! empty($data['reservoir_id'])) {
+            $reservoir = Reservoir::query()->where('is_active', true)->findOrFail($data['reservoir_id']);
+            $this->assertScopedDistrict($request, (int) $reservoir->district_id);
+        } else {
+            $districtId = (int) $data['district_id'];
+            $this->assertScopedDistrict($request, $districtId);
+
+            $reservoir = Reservoir::query()
+                ->where('district_id', $districtId)
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->first();
+
+            if (! $reservoir) {
+                throw ValidationException::withMessages([
+                    'district_id' => 'No active water bodies are available in the selected district.',
+                ]);
+            }
+        }
 
         $category = LicenseCategory::query()->findOrFail($data['category_id']);
-        $start = $data['fishing_start_date'];
+        $isSeasonal = $category->duration_type === 'seasonal'
+            || in_array($category->expiry_rule, ['fixed_date', 'season_end'], true);
+
+        if ($isSeasonal) {
+            $start = now()->toDateString();
+            $data['fishing_start_date'] = $start;
+        } else {
+            if (empty($data['fishing_start_date'])) {
+                throw ValidationException::withMessages([
+                    'fishing_start_date' => 'The fishing start date field is required.',
+                ]);
+            }
+            $start = $data['fishing_start_date'];
+        }
 
         $closed = $policy->isClosedOn($start, $reservoir->id, $category->id);
         if ($closed) {
@@ -188,9 +230,9 @@ class ApplicationController extends Controller
                 $receiptPath = $request->file('payment_receipt')->store('receipts', 'public');
             }
 
-            $psid = $data['payment_method'] === '1bill'
-                ? 'PSID-WALKIN-'.strtoupper(substr(md5($user->id.'|'.$reservoir->id.'|'.now()->timestamp), 0, 10))
-                : null;
+            $initialStatus = Application::isOnlinePaymentMethod($data['payment_method'])
+                ? Application::STATUS_PENDING
+                : Application::STATUS_UNDER_REVIEW;
 
             $application = Application::query()->create([
                 'application_no' => $workflow->nextApplicationNo(),
@@ -202,11 +244,11 @@ class ApplicationController extends Controller
                 'fishing_end_date' => $end->toDateString(),
                 'fee_amount_snapshot' => $category->fee_amount,
                 'currency' => $category->currency,
-                'status' => Application::STATUS_UNDER_REVIEW,
+                'status' => $initialStatus,
                 'payment_method' => $data['payment_method'],
                 'payment_reference' => $data['payment_reference'] ?? ($data['payment_method'] === 'counter_cash' ? 'COUNTER-CASH-'.now()->format('YmdHis') : null),
                 'payment_receipt_path' => $receiptPath,
-                'psid_code' => $psid,
+                'psid_code' => null,
             ]);
 
             if ($receiptPath) {
@@ -221,28 +263,67 @@ class ApplicationController extends Controller
             return $application;
         });
 
-        if (! empty($data['auto_approve']) || $data['payment_method'] === 'counter_cash') {
+        $isOnlinePayment = Application::isOnlinePaymentMethod($data['payment_method']);
+        $psidSuffix = '';
+        if ($isOnlinePayment) {
+            $paymirResult = $paymir->generatePsidForApplication($application, $application->user);
+            $psidSuffix = ' PAYMIR PSID: '.$paymirResult['psid'];
+        }
+
+        if (! $isOnlinePayment && (! empty($data['auto_approve']) || $data['payment_method'] === 'counter_cash')) {
             $remarks = $data['officer_remarks'] ?: 'Walk-in application registered and counter payment received.';
             $license = $workflow->approve($application, $request->user(), $remarks);
 
             return redirect()
                 ->route('admin.applications.show', $application)
-                ->with('status', 'Walk-in licence issued immediately. Licence No: '.$license->license_no);
+                ->with('status', 'Walk-in licence issued immediately. Licence No: '.$license->license_no.$psidSuffix);
         }
 
         $workflow->notifySubmitted($application);
 
         return redirect()
             ->route('admin.applications.show', $application)
-            ->with('status', 'Walk-in application registered for review.');
+            ->with('status', 'Walk-in application registered for review.'.$psidSuffix);
     }
 
     public function show(Request $request, Application $application): View
     {
         $this->assertScoped($request, $application);
-        $application->load(['user.citizenProfile', 'reservoir.district', 'reservoir.office', 'category', 'license', 'payments', 'reviewer']);
+        $application->load([
+            'user.citizenProfile',
+            'reservoir.district',
+            'reservoir.office',
+            'category',
+            'license.user.citizenProfile',
+            'license.reservoir.district',
+            'license.category',
+            'license.application',
+            'payments',
+            'reviewer',
+        ]);
 
         return view('admin.applications.show', compact('application'));
+    }
+
+    public function card(Request $request, Application $application): View
+    {
+        $this->assertScoped($request, $application);
+        $application->load([
+            'user.citizenProfile',
+            'reservoir.district',
+            'category',
+            'license.user.citizenProfile',
+            'license.reservoir.district',
+            'license.category',
+            'license.application',
+        ]);
+
+        abort_unless($application->license !== null, 404, 'Licence has not been issued for this application yet.');
+
+        return view('admin.applications.card', [
+            'application' => $application,
+            'license' => $application->license,
+        ]);
     }
 
     public function approve(Request $request, Application $application, ApplicationWorkflowService $workflow): RedirectResponse

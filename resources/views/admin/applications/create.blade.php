@@ -175,35 +175,66 @@
                 </div>
                 <div class="content-shell-body p-4">
                     <div class="mb-3">
-                        <label class="form-label" for="reservoir_id">Water Body / Reservoir <span class="text-danger">*</span></label>
-                        <select name="reservoir_id" id="reservoir_id" class="form-select @error('reservoir_id') is-invalid @enderror" required>
-                            <option value="">-- Select Water Body --</option>
-                            @foreach ($reservoirs as $res)
-                                <option value="{{ $res->id }}" @selected(old('reservoir_id') == $res->id)>
-                                    {{ $res->name }} (Dist: {{ $res->district?->name }})
+                        <label class="form-label" for="district_id">District <span class="text-danger">*</span></label>
+                        <select name="district_id" id="district_id" class="form-select @error('district_id') is-invalid @enderror" required onchange="renderDistrictWaterBodies()">
+                            <option value="">-- Select District --</option>
+                            @foreach (($licensingDistricts ?? $districts) as $d)
+                                <option value="{{ $d->id }}" @selected(old('district_id') == $d->id)>
+                                    {{ $d->name }}
                                 </option>
                             @endforeach
                         </select>
-                        @error('reservoir_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        @error('district_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label d-flex justify-content-between align-items-center mb-1">
+                            <span>Available Water Bodies in District</span>
+                            <span class="badge text-bg-light border text-secondary fw-normal" id="waterBodiesCountBadge">0 available</span>
+                        </label>
+                        <div id="districtWaterBodiesBox" class="p-3 bg-light rounded-3 border small" style="max-height: 240px; overflow-y: auto;">
+                            <div class="text-secondary" id="waterBodiesPlaceholder">
+                                <i class="bi bi-info-circle me-1"></i> Select a district above to view available water bodies.
+                            </div>
+                            <ul class="list-unstyled mb-0 d-none" id="waterBodiesList"></ul>
+                        </div>
+                        <div class="form-text small">Available water bodies in the selected district (no selection required).</div>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label" for="category_id">Licence Category <span class="text-danger">*</span></label>
-                        <select name="category_id" id="category_id" class="form-select @error('category_id') is-invalid @enderror" required>
+                        <select name="category_id" id="category_id" class="form-select @error('category_id') is-invalid @enderror" required onchange="handleCategoryChange()">
                             <option value="">-- Select Category --</option>
                             @foreach ($categories as $cat)
                                 <option value="{{ $cat->id }}" @selected(old('category_id') == $cat->id)>
-                                    {{ $cat->name }} — {{ number_format((float)$cat->fee_amount, 0) }} {{ $cat->currency }} ({{ $cat->validity_duration_days }} days)
+                                    {{ $cat->name }} — {{ number_format((float)$cat->fee_amount, 0) }} {{ $cat->currency }} ({{ $cat->duration_days ? $cat->duration_days.' days' : ucfirst($cat->duration_type) }})
                                 </option>
                             @endforeach
                         </select>
                         @error('category_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
-                    <div class="mb-3">
+                    <div class="mb-3" id="dailyStartDateBlock">
                         <label class="form-label" for="fishing_start_date">Fishing Start Date <span class="text-danger">*</span></label>
                         <input type="date" name="fishing_start_date" id="fishing_start_date" value="{{ old('fishing_start_date', now()->toDateString()) }}" class="form-control @error('fishing_start_date') is-invalid @enderror" required>
                         @error('fishing_start_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+
+                    <div class="mb-3 d-none" id="seasonalDatesBlock">
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label class="form-label" for="seasonal_from_date">From Date (Current Date)</label>
+                                <input type="date" id="seasonal_from_date" value="{{ now()->toDateString() }}" class="form-control bg-light" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="seasonal_end_date">End Date (Closed Season)</label>
+                                <input type="date" id="seasonal_end_date" value="" class="form-control bg-light" readonly>
+                            </div>
+                        </div>
+                        <div class="form-text small mt-1">
+                            <i class="bi bi-calendar-check text-rflms me-1"></i>
+                            Seasonal licence starts from the current date and expires on the closed season end date defined for this licence (<span id="seasonalEndDateLabel">—</span>).
+                        </div>
                     </div>
                 </div>
             </div>
@@ -260,14 +291,159 @@
     </div>
 </form>
 
+@php
+    $waterBodiesByDistrict = ($licensingDistricts ?? $districts)->mapWithKeys(fn ($d) => [
+        $d->id => ($d->reservoirs ?? collect())->map(function ($r) {
+            $lat = $r->latitude ?? $r->start_lat;
+            $lng = $r->longitude ?? $r->start_lng;
+            $mapUrl = ($lat !== null && $lng !== null)
+                ? 'https://www.google.com/maps?q=' . $lat . ',' . $lng
+                : $r->directions_url;
+
+            return [
+                'id' => $r->id,
+                'name' => $r->name,
+                'type' => $r->typeLabel(),
+                'trout_type' => $r->trout_type,
+                'trout_label' => $r->troutLabel(),
+                'license_type' => $r->licensePermitsLabel(),
+                'lat' => $lat,
+                'lng' => $lng,
+                'map_url' => $mapUrl,
+            ];
+        })->values(),
+    ]);
+    $policyService = app(\App\Services\LicensingPolicyService::class);
+    $todayStr = now()->toDateString();
+    $categoryMeta = $categories->mapWithKeys(function ($cat) use ($policyService, $todayStr) {
+        $isSeasonal = $cat->duration_type === 'seasonal'
+            || in_array($cat->expiry_rule, ['fixed_date', 'season_end'], true)
+            || str_contains(strtolower((string) $cat->name), 'seasonal');
+        $endDate = $policyService->calculateEndDate($cat, $todayStr);
+
+        return [
+            $cat->id => [
+                'id' => $cat->id,
+                'duration_type' => $cat->duration_type,
+                'is_seasonal' => $isSeasonal,
+                'from_date' => $todayStr,
+                'end_date' => $endDate->toDateString(),
+                'end_date_formatted' => $endDate->format('d M Y'),
+            ],
+        ];
+    });
+@endphp
+
 @push('scripts')
 <script>
+    const districtWaterBodies = @json($waterBodiesByDistrict);
+    const categoriesMeta = @json($categoryMeta);
+    const currentDateStr = @json($todayStr);
+
     function toggleCitizenMode() {
         const isExisting = document.getElementById('citizenExisting').checked;
         document.getElementById('existingCitizenBlock').style.display = isExisting ? 'block' : 'none';
         document.getElementById('newCitizenBlock').style.display = isExisting ? 'none' : 'block';
     }
-    document.addEventListener('DOMContentLoaded', toggleCitizenMode);
+
+    function handleCategoryChange() {
+        const categoryId = document.getElementById('category_id')?.value;
+        const meta = categoryId ? categoriesMeta[categoryId] : null;
+        const dailyBlock = document.getElementById('dailyStartDateBlock');
+        const seasonalBlock = document.getElementById('seasonalDatesBlock');
+        const startInput = document.getElementById('fishing_start_date');
+        const seasonalFromInput = document.getElementById('seasonal_from_date');
+        const seasonalEndInput = document.getElementById('seasonal_end_date');
+        const seasonalEndLabel = document.getElementById('seasonalEndDateLabel');
+
+        if (meta && meta.is_seasonal) {
+            dailyBlock.classList.add('d-none');
+            seasonalBlock.classList.remove('d-none');
+            if (startInput) {
+                startInput.value = meta.from_date || currentDateStr;
+            }
+            if (seasonalFromInput) {
+                seasonalFromInput.value = meta.from_date || currentDateStr;
+            }
+            if (seasonalEndInput) {
+                seasonalEndInput.value = meta.end_date || '';
+            }
+            if (seasonalEndLabel) {
+                seasonalEndLabel.textContent = meta.end_date_formatted || meta.end_date || '';
+            }
+        } else {
+            dailyBlock.classList.remove('d-none');
+            seasonalBlock.classList.add('d-none');
+        }
+    }
+
+    function renderDistrictWaterBodies() {
+        const districtId = document.getElementById('district_id')?.value;
+        const placeholder = document.getElementById('waterBodiesPlaceholder');
+        const listEl = document.getElementById('waterBodiesList');
+        const countBadge = document.getElementById('waterBodiesCountBadge');
+
+        if (!districtId) {
+            placeholder.innerHTML = '<i class="bi bi-info-circle me-1"></i> Select a district above to view available water bodies.';
+            placeholder.classList.remove('d-none');
+            listEl.classList.add('d-none');
+            listEl.innerHTML = '';
+            countBadge.textContent = '0 available';
+            return;
+        }
+
+        const items = districtWaterBodies[districtId] || [];
+        countBadge.textContent = items.length + ' available';
+
+        if (items.length === 0) {
+            placeholder.innerHTML = '<i class="bi bi-exclamation-circle text-warning me-1"></i> No active water bodies found in this district.';
+            placeholder.classList.remove('d-none');
+            listEl.classList.add('d-none');
+            listEl.innerHTML = '';
+            return;
+        }
+
+        placeholder.classList.add('d-none');
+        listEl.classList.remove('d-none');
+        listEl.innerHTML = items.map(item => {
+            const troutBadgeClass = item.trout_type === 'trout'
+                ? 'text-bg-info text-dark'
+                : (item.trout_type === 'mixed' ? 'text-bg-warning text-dark' : 'text-bg-secondary');
+
+            const mapBtn = item.map_url
+                ? `<a href="${item.map_url}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.75rem;" title="Open in Google Maps (${item.lat ?? ''}, ${item.lng ?? ''})">
+                       <i class="bi bi-geo-alt-fill me-1"></i>Google Map
+                   </a>`
+                : `<span class="text-muted" style="font-size: 0.75rem;"><i class="bi bi-geo-alt me-1"></i>No coordinates</span>`;
+
+            const licensePermitsRow = item.license_type
+                ? `<div class="ps-3 mt-1 text-secondary" style="font-size: 0.78rem;">
+                       <span class="fw-semibold text-dark"><i class="bi bi-card-checklist text-rflms me-1"></i>License / Permits:</span>
+                       <span>${item.license_type}</span>
+                   </div>`
+                : '';
+
+            return `
+                <li class="py-2 border-bottom border-light-subtle">
+                    <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
+                        <span class="fw-semibold text-dark"><i class="bi bi-water text-rflms me-1"></i>${item.name}</span>
+                        ${mapBtn}
+                    </div>
+                    <div class="d-flex flex-wrap align-items-center gap-1 ps-3">
+                        <span class="badge text-bg-white border text-secondary fw-normal">${item.type}</span>
+                        <span class="badge ${troutBadgeClass} fw-normal">${item.trout_label}</span>
+                    </div>
+                    ${licensePermitsRow}
+                </li>
+            `;
+        }).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        toggleCitizenMode();
+        renderDistrictWaterBodies();
+        handleCategoryChange();
+    });
 </script>
 @endpush
 @endsection

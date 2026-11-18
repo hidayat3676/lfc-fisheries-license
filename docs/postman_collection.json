@@ -617,6 +617,39 @@
           }
         },
         {
+          "name": "Get License Application Data (Districts, Reservoirs, Categories & Closed Seasons)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/licenses/application-data",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "licenses",
+                "application-data"
+              ]
+            }
+          }
+        },
+        {
           "name": "Get License Applications",
           "request": {
             "auth": {
@@ -650,7 +683,7 @@
           }
         },
         {
-          "name": "Store License Application (JSON - 1Bill / Online)",
+          "name": "Store License Application (Daily - PAYMIR Online Payment / PSID)",
           "request": {
             "auth": {
               "type": "bearer",
@@ -677,7 +710,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reservoir_id\": 1,\n  \"category_id\": 1,\n  \"fishing_start_date\": \"2026-08-15\",\n  \"payment_method\": \"1bill\",\n  \"payment_reference\": \"TXN-987654321\",\n  \"payment_receipt\": null,\n  \"accept_terms\": true\n}",
+              "raw": "{\n  \"district_id\": 1,\n  \"category_id\": 1,\n  \"fishing_start_date\": \"2026-11-20\",\n  \"payment_method\": \"1bill\",\n  \"accept_terms\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -697,7 +730,54 @@
           }
         },
         {
-          "name": "Store License Application (Multipart - Bank Transfer / Receipt)",
+          "name": "Store License Application (Seasonal - PAYMIR Online Payment / PSID)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"district_id\": 1,\n  \"category_id\": 3,\n  \"payment_method\": \"paymir\",\n  \"accept_terms\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/licenses/applications",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "licenses",
+                "applications"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Store License Application (Multipart - Bank Deposit Slip)",
           "request": {
             "auth": {
               "type": "bearer",
@@ -721,7 +801,7 @@
               "mode": "formdata",
               "formdata": [
                 {
-                  "key": "reservoir_id",
+                  "key": "district_id",
                   "value": "1",
                   "type": "text"
                 },
@@ -732,17 +812,17 @@
                 },
                 {
                   "key": "fishing_start_date",
-                  "value": "2026-08-15",
+                  "value": "2026-11-20",
                   "type": "text"
                 },
                 {
                   "key": "payment_method",
-                  "value": "bank_transfer",
+                  "value": "bank_deposit",
                   "type": "text"
                 },
                 {
                   "key": "payment_reference",
-                  "value": "TXN-987654321",
+                  "value": "TRX-987654321",
                   "type": "text"
                 },
                 {
@@ -752,7 +832,7 @@
                 },
                 {
                   "key": "accept_terms",
-                  "value": "true",
+                  "value": "1",
                   "type": "text"
                 }
               ]

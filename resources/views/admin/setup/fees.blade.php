@@ -110,6 +110,15 @@
                     <label class="form-check-label" for="closed_is_active">Closed season active</label>
                 </div>
             </div>
+            <div class="col-12 mt-2 pt-2 border-top">
+                <span class="small text-secondary">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Need water-body or category-specific closed seasons?
+                    <a href="{{ route('admin.closed-seasons.index') }}" class="fw-semibold text-rflms">
+                        Manage all closed seasons in the dedicated Closed Seasons portal &rarr;
+                    </a>
+                </span>
+            </div>
         </div>
     </div>
 

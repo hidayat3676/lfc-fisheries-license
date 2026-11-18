@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Application;
+use App\Models\ClosedSeason;
 use App\Models\License;
 use App\Models\Payment;
 use App\Models\Reservoir;
@@ -29,6 +30,7 @@ class DashboardController extends Controller
 
         $stats = [
             'pending_applications' => (clone $apps)->whereIn('status', [
+                Application::STATUS_PENDING,
                 Application::STATUS_SUBMITTED,
                 Application::STATUS_UNDER_REVIEW,
                 Application::STATUS_INFO_REQUIRED,
@@ -66,6 +68,12 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-        return view('admin.dashboard', compact('stats', 'recentApplications', 'recentViolations'));
+        $activeTodayClosures = ClosedSeason::query()
+            ->where('is_active', true)
+            ->with(['reservoir', 'category'])
+            ->get()
+            ->filter(fn (ClosedSeason $s) => $s->isCurrentlyActive());
+
+        return view('admin.dashboard', compact('stats', 'recentApplications', 'recentViolations', 'activeTodayClosures'));
     }
 }

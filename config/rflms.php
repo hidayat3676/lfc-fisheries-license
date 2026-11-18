@@ -11,6 +11,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | PAYMIR Payment Gateway (Directorate of Fisheries — SRV-0070)
+    |--------------------------------------------------------------------------
+    */
+    'paymir' => [
+        'base_url' => env('PAYMIR_BASE_URL', 'https://privatesandbox.kp.gov.pk'),
+        'service_code' => env('PAYMIR_SERVICE_CODE', 'SRV-0070'),
+        'username' => env('PAYMIR_USERNAME', 'PMR-SRV-0070'),
+        'password' => env('PAYMIR_PASSWORD', 'QWERTYU34567ASDFGhwertyu34567ASDFG3456dfgh34567DFug'),
+        'payment_key' => env('PAYMIR_PAYMENT_KEY', 'hgYFhvkhFKYUdfyuhvgIHFKTWY76rtuHVhjcjhvKFudhjhcv'),
+        'department_name' => env('PAYMIR_DEPARTMENT_NAME', 'Directorate of Fisheries'),
+        'service_name' => env('PAYMIR_SERVICE_NAME', 'Fishing E-License'),
+        'dpt_prefix' => env('PAYMIR_DPT_PREFIX', 'ABCD-3009'),
+        'tag' => env('PAYMIR_TAG', '10023779400053'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Policy defaults (overridable in Admin → Setup)
     |--------------------------------------------------------------------------
     */

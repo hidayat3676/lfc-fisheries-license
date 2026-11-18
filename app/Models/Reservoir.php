@@ -16,6 +16,7 @@ class Reservoir extends Model
         'name',
         'water_body_type',
         'trout_type',
+        'license_type',
         'description',
         'latitude',
         'longitude',
@@ -55,10 +56,29 @@ class Reservoir extends Model
     public function imageUrl(): ?string
     {
         if ($this->image_path) {
+            if (str_starts_with($this->image_path, 'http://') || str_starts_with($this->image_path, 'https://')) {
+                return $this->image_path;
+            }
+
             return \Illuminate\Support\Facades\Storage::url($this->image_path);
         }
 
-        return null;
+        return $this->defaultImageUrl();
+    }
+
+    public function defaultImageUrl(): string
+    {
+        if ($this->trout_type === 'trout') {
+            return 'https://images.unsplash.com/photo-1439066615861-d1af74d74000?auto=format&fit=crop&w=900&q=80';
+        }
+
+        return match ($this->water_body_type) {
+            'dam' => 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=900&q=80',
+            'river' => 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=900&q=80',
+            'stream' => 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=900&q=80',
+            'canal' => 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=900&q=80',
+            default => 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=900&q=80',
+        };
     }
 
     protected function casts(): array
@@ -138,6 +158,19 @@ class Reservoir extends Model
             'non_trout' => 'Non-trout',
             'mixed' => 'Mixed',
             default => 'Unknown',
+        };
+    }
+
+    public function licensePermitsLabel(): string
+    {
+        if (! empty($this->license_type)) {
+            return (string) $this->license_type;
+        }
+
+        return match ($this->trout_type) {
+            'trout' => 'Daily Angling License (Trout)',
+            'mixed' => 'Daily Angling License (Trout / Non-Trout), Rod & Line Only',
+            default => 'Daily Angling License (Non-Trout), Rod & Line Only',
         };
     }
 

@@ -23,8 +23,29 @@ class ApplicationWorkflowService
         return sprintf('APP-%s-%05d', $year, $count);
     }
 
-    public function nextLicenseNo(): string
+    public function nextLicenseNo(?Application $application = null): string
     {
+        if ($application) {
+            $application->loadMissing('reservoir.district');
+            $districtName = (string) ($application->reservoir?->district?->name ?? 'KPK');
+            $cleanDistrict = preg_replace('/[^A-Za-z]/', '', $districtName);
+            $distPrefix = str_pad(strtoupper(substr($cleanDistrict ?: 'KPK', 0, 3)), 3, 'X');
+
+            $monthYear = now()->format('my');
+            $actorId = $application->applied_by ?: $application->user_id;
+
+            $base = sprintf('%s-%s-%s', $distPrefix, $monthYear, $actorId);
+            $candidate = $base;
+            $seq = 2;
+
+            while (License::query()->where('license_no', $candidate)->exists()) {
+                $candidate = sprintf('%s-%d', $base, $seq);
+                $seq++;
+            }
+
+            return $candidate;
+        }
+
         $year = now()->format('Y');
         $count = License::query()->whereYear('created_at', $year)->count() + 1;
 
@@ -55,7 +76,7 @@ class ApplicationWorkflowService
                 ]);
 
             return License::query()->create([
-                'license_no' => $this->nextLicenseNo(),
+                'license_no' => $this->nextLicenseNo($application),
                 'application_id' => $application->id,
                 'user_id' => $application->user_id,
                 'reservoir_id' => $application->reservoir_id,

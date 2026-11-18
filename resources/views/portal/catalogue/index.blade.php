@@ -86,6 +86,10 @@
                                         <span class="text-muted">· {{ $item->office->name }}</span>
                                     @endif
                                 </div>
+                                <div class="small text-secondary mb-2">
+                                    <span class="fw-semibold text-dark"><i class="bi bi-card-checklist text-rflms me-1"></i>Permits:</span>
+                                    {{ $item->licensePermitsLabel() }}
+                                </div>
                                 <div class="small d-flex align-items-center gap-2 flex-wrap mb-3">
                                     @if ($item->hasCoordinates())
                                         <span><i class="bi bi-map text-rflms me-1"></i>Map available</span>

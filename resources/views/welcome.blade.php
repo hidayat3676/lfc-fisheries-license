@@ -57,7 +57,7 @@
                 </div>
 
                 <div class="d-flex flex-wrap gap-3">
-                    <a href="{{ route('catalogue.index') }}" class="btn btn-warning btn-lg text-dark fw-bold btn-chip px-4">
+                    <a href="{{ route('reservoirs.index') }}" class="btn btn-warning btn-lg text-dark fw-bold btn-chip px-4">
                         <i class="bi bi-water"></i> Explore Water Bodies
                     </a>
                     <a href="#how-it-works" class="btn btn-outline-light btn-lg btn-chip px-4">
@@ -77,7 +77,7 @@
                         <span class="badge bg-rflms rounded-pill px-2 py-1" style="font-size: 0.7rem;">KP E-Catalog</span>
                     </div>
 
-                    <form action="{{ route('catalogue.index') }}" method="GET">
+                    <form action="{{ route('reservoirs.index') }}" method="GET">
                         <div class="mb-3">
                             <label class="form-label small text-muted">Keywords / Water Body Name</label>
                             <div class="input-group">
@@ -130,12 +130,12 @@
     </div>
     <div class="row g-3">
         <div class="col-md-3 col-6">
-            <a href="{{ route('catalogue.index') }}" class="action-card p-3 rounded-4 bg-white h-100 shadow-sm border">
+            <a href="{{ route('citizen.applications.apply') }}" class="action-card p-3 rounded-4 bg-white h-100 shadow-sm border">
                 <div class="d-flex align-items-center gap-3">
                     <div class="action-icon" style="width:2.75rem;height:2.75rem;font-size:1.2rem"><i class="bi bi-card-checklist"></i></div>
                     <div>
                         <div class="fw-bold text-dark">Apply License</div>
-                        <div class="text-secondary small" style="font-size:0.78rem">Select location &amp; category</div>
+                        <div class="text-secondary small" style="font-size:0.78rem">Select district &amp; category</div>
                     </div>
                 </div>
             </a>
@@ -152,7 +152,7 @@
             </a>
         </div>
         <div class="col-md-3 col-6">
-            <a href="{{ route('catalogue.index') }}" class="action-card p-3 rounded-4 bg-white h-100 shadow-sm border">
+            <a href="{{ route('reservoirs.index') }}" class="action-card p-3 rounded-4 bg-white h-100 shadow-sm border">
                 <div class="d-flex align-items-center gap-3">
                     <div class="action-icon" style="width:2.75rem;height:2.75rem;font-size:1.2rem;background:#e8f8ef;color:#27ae60"><i class="bi bi-compass"></i></div>
                     <div>
@@ -225,7 +225,7 @@
                     </li>
                 </ul>
 
-                <a href="{{ route('catalogue.index') }}" class="btn btn-rflms w-100 btn-chip justify-content-center">
+                <a href="{{ route('citizen.applications.apply') }}" class="btn btn-rflms w-100 btn-chip justify-content-center">
                     <i class="bi bi-check2-circle"></i> Apply Category
                 </a>
             </div>
@@ -246,7 +246,7 @@
                 <p class="text-secondary mb-0">Explore key fishing grounds, trout streams, and reservoirs in KP.</p>
             </div>
         </div>
-        <a href="{{ route('catalogue.index') }}" class="btn btn-outline-dark btn-chip">
+        <a href="{{ route('reservoirs.index') }}" class="btn btn-rflms btn-chip">
             <i class="bi bi-grid-fill"></i> View All {{ $totalReservoirs ?? '' }} Water Bodies
         </a>
     </div>
@@ -273,6 +273,10 @@
                             <span>District {{ $reservoir->district->name ?? 'KP' }}</span>
                         </div>
                         <h3 class="h5 fw-bold text-dark mb-2">{{ $reservoir->name }}</h3>
+                        <div class="small text-secondary mb-2">
+                            <span class="fw-semibold text-dark"><i class="bi bi-card-checklist text-rflms me-1"></i>Permits:</span>
+                            {{ $reservoir->licensePermitsLabel() }}
+                        </div>
                         <p class="text-secondary small mb-3">
                             {{ Str::limit($reservoir->description ?? 'Natural water body under management of Directorate General of Fisheries KP.', 100) }}
                             <a href="#" class="text-primary text-decoration-none fw-semibold ms-1" data-bs-toggle="modal" data-bs-target="#reservoirModal-{{ $reservoir->id }}">
@@ -393,6 +397,12 @@
             </div>
         </div>
         @endforeach
+    </div>
+
+    <div class="text-center mt-4 pt-2">
+        <a href="{{ route('reservoirs.index') }}" class="btn btn-rflms btn-lg btn-chip px-5">
+            <i class="bi bi-compass me-1"></i> Explore All {{ $totalReservoirs ?? '' }} Reservoirs &amp; Water Bodies Directory
+        </a>
     </div>
 </section>
 @endif

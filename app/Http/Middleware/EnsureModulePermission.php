@@ -12,7 +12,24 @@ class EnsureModulePermission
     {
         $user = $request->user();
 
-        if (! $user || ! $user->hasModuleAction($module, $action)) {
+        if (! $user) {
+            abort(403, 'You do not have permission for this action.');
+        }
+
+        $modules = explode('|', $module);
+        $actions = explode('|', $action);
+
+        $allowed = false;
+        foreach ($modules as $m) {
+            foreach ($actions as $a) {
+                if ($user->hasModuleAction(trim($m), trim($a))) {
+                    $allowed = true;
+                    break 2;
+                }
+            }
+        }
+
+        if (! $allowed) {
             abort(403, 'You do not have permission for this action.');
         }
 

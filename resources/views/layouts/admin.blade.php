@@ -59,6 +59,12 @@
                             Applications
                         </a>
                     @endif
+                    @if (auth()->user()->hasModuleAction('payments', 'view') || auth()->user()->hasModuleAction('applications', 'view') || auth()->user()->hasModuleAction('settings', 'view'))
+                        <a href="{{ route('admin.paymir.index') }}" class="sidebar-link {{ request()->routeIs('admin.paymir.*') ? 'active' : '' }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v1h14V4a1 1 0 0 0-1-1zm13 4H1v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1z"/><path d="M2 10a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/></svg>
+                            PAYMIR
+                        </a>
+                    @endif
                     @if (auth()->user()->hasModuleAction('reports', 'view'))
                         <a href="{{ route('admin.reports.index') }}" class="sidebar-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M1 11a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1zm5-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zm5-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1z"/></svg>
@@ -75,6 +81,12 @@
                         <a href="{{ route('admin.categories.index') }}" class="sidebar-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M2 1a1 1 0 0 0-1 1v4.586a1 1 0 0 0 .293.707l7 7a1 1 0 0 0 1.414 0l4.586-4.586a1 1 0 0 0 0-1.414l-7-7A1 1 0 0 0 6.586 1zm4 3.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/></svg>
                             Licence categories
+                        </a>
+                    @endif
+                    @if (auth()->user()->hasModuleAction('license_categories', 'view') || auth()->user()->hasModuleAction('settings', 'view'))
+                        <a href="{{ route('admin.closed-seasons.index') }}" class="sidebar-link {{ request()->routeIs('admin.closed-seasons.*') ? 'active' : '' }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/><path d="M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 10l2.647 2.646a.5.5 0 0 1-.708.708L8 10.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 10 4.646 7.354a.5.5 0 0 1 0-.708"/></svg>
+                            Closed seasons
                         </a>
                     @endif
                     @if (auth()->user()->hasModuleAction('offices', 'view'))

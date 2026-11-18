@@ -74,12 +74,12 @@
             </a>
         </div>
         <div class="col-md-4">
-            <a href="{{ route('catalogue.index') }}" class="action-card bg-white rounded-4 p-4 shadow-sm h-100">
+            <a href="{{ route('citizen.applications.apply') }}" class="action-card bg-white rounded-4 p-4 shadow-sm h-100">
                 <div class="d-flex align-items-start gap-3">
                     <span class="action-icon"><i class="bi bi-water"></i></span>
                     <div>
-                        <div class="fw-semibold mb-1">Browse water bodies</div>
-                        <p class="text-secondary small mb-0">Choose a reservoir and apply for a licence.</p>
+                        <div class="fw-semibold mb-1">Apply for licence</div>
+                        <p class="text-secondary small mb-0">Select a district, view available water bodies, and apply.</p>
                     </div>
                 </div>
             </a>

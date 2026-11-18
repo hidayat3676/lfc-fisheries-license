@@ -14,19 +14,43 @@ class LicensingPolicyService
     public function calculateEndDate(LicenseCategory $category, CarbonInterface|string $start): Carbon
     {
         $start = Carbon::parse($start)->startOfDay();
+
+        if (
+            $category->duration_type === 'seasonal'
+            || in_array($category->expiry_rule, ['fixed_date', 'season_end'], true)
+        ) {
+            return $this->nextFixedDate($start, $this->seasonalEndMonthDayForCategory($category));
+        }
+
+        return $start->copy()->addDays(max(1, (int) ($category->duration_days ?: 1)) - 1);
+    }
+
+    public function seasonalEndMonthDayForCategory(LicenseCategory $category): string
+    {
+        $categorySeason = ClosedSeason::query()
+            ->active()
+            ->where('scope_type', 'category')
+            ->where('scope_id', $category->id)
+            ->latest('id')
+            ->first();
+
+        if ($categorySeason) {
+            return sprintf('%02d-%02d', (int) $categorySeason->end_month, (int) $categorySeason->end_day);
+        }
+
+        $globalSeason = ClosedSeason::query()
+            ->active()
+            ->where('scope_type', 'global')
+            ->latest('id')
+            ->first();
+
+        if ($globalSeason) {
+            return sprintf('%02d-%02d', (int) $globalSeason->end_month, (int) $globalSeason->end_day);
+        }
+
         $seasonalExpiry = app(SystemSettingService::class)->seasonalExpiryMonthDay();
 
-        return match ($category->expiry_rule) {
-            'fixed_date' => $this->nextFixedDate(
-                $start,
-                (string) ($category->fixed_expiry_month_day ?: $seasonalExpiry)
-            ),
-            'season_end' => $this->nextFixedDate(
-                $start,
-                $category->fixed_expiry_month_day ?: $seasonalExpiry
-            ),
-            default => $start->copy()->addDays(max(1, (int) ($category->duration_days ?: 1)) - 1),
-        };
+        return (string) ($category->fixed_expiry_month_day ?: $seasonalExpiry);
     }
 
     public function isClosedOn(CarbonInterface|string $date, ?int $reservoirId = null, ?int $categoryId = null): ?ClosedSeason

@@ -632,11 +632,10 @@
 
                                 <div class="row g-1 mt-1">
                                     <div class="col-6">
-                                        <div class="field-label">Water Body &amp; District</div>
-                                        <div class="field-value small text-truncate" title="{{ $license->reservoir?->name }}">
-                                            {{ $license->reservoir?->name }}
+                                        <div class="field-label">District</div>
+                                        <div class="field-value small text-truncate">
+                                            {{ $license->reservoir?->district?->name ?: 'KP' }}
                                         </div>
-                                        <div class="text-muted" style="font-size:0.7rem">Dist. {{ $license->reservoir?->district?->name }}</div>
                                     </div>
                                     <div class="col-6">
                                         <div class="field-label">Category</div>
@@ -708,10 +707,10 @@
                             </div>
 
                             <ul class="terms-list">
-                                <li>This digital permit is strictly non-transferable and valid only for the named licensee and designated water body.</li>
+                                <li>This digital permit is strictly non-transferable and valid only for the named licensee and designated district.</li>
                                 <li>Fishing allowed with Rod &amp; Line only. Netting, dynamite, poisons, and electric currents are severe illegal offences.</li>
                                 <li>Licensee must produce this card or PDF on demand to Fisheries Wardens &amp; Officers.</li>
-                                <li>Strictly adhere to species bag limits and minimum size regulations for {{ $license->reservoir?->name }}.</li>
+                                <li>Strictly adhere to species bag limits and minimum size regulations for District {{ $license->reservoir?->district?->name ?: 'KP' }}.</li>
                             </ul>
                         </div>
 

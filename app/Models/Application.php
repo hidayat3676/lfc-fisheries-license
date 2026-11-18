@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Application extends Model
 {
+    public const STATUS_PENDING = 'pending';
+
     public const STATUS_SUBMITTED = 'submitted';
 
     public const STATUS_UNDER_REVIEW = 'under_review';
@@ -31,6 +33,10 @@ class Application extends Model
     public const PAYMENT_METHOD_1BILL = '1bill';
 
     public const PAYMENT_METHOD_ONLINE_TRANSFER = 'online_transfer';
+
+    public const PAYMENT_METHOD_ONLINE_PAYMENT = 'online_payment';
+
+    public const PAYMENT_METHOD_PAYMIR = 'paymir';
 
     public const PAYMENT_METHOD_CASH = 'cash';
 
@@ -80,8 +86,21 @@ class Application extends Model
             self::PAYMENT_METHOD_BANK_DEPOSIT,
             self::PAYMENT_METHOD_1BILL,
             self::PAYMENT_METHOD_ONLINE_TRANSFER,
+            self::PAYMENT_METHOD_ONLINE_PAYMENT,
+            self::PAYMENT_METHOD_PAYMIR,
             self::PAYMENT_METHOD_CASH,
         ];
+    }
+
+    public static function isOnlinePaymentMethod(?string $method): bool
+    {
+        return in_array($method, [
+            self::PAYMENT_METHOD_1BILL,
+            self::PAYMENT_METHOD_PAYMIR,
+            self::PAYMENT_METHOD_ONLINE_PAYMENT,
+            self::PAYMENT_METHOD_ONLINE_TRANSFER,
+            self::PAYMENT_METHOD_BANK_TRANSFER,
+        ], true);
     }
 
     protected $fillable = [
@@ -167,6 +186,16 @@ class Application extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function voucher(): HasOne
+    {
+        return $this->hasOne(Voucher::class)->latestOfMany();
+    }
+
+    public function vouchers(): HasMany
+    {
+        return $this->hasMany(Voucher::class);
+    }
+
     public function scopeForUserDistricts(Builder $query, User $user): Builder
     {
         $ids = $user->scopedDistrictIds();
@@ -180,6 +209,7 @@ class Application extends Model
     public function statusLabel(): string
     {
         return match ($this->status) {
+            self::STATUS_PENDING => 'Pending',
             self::STATUS_SUBMITTED => 'Submitted',
             self::STATUS_UNDER_REVIEW => 'Under review',
             self::STATUS_INFO_REQUIRED => 'Info required',
@@ -192,6 +222,19 @@ class Application extends Model
 
     public function isPendingReview(): bool
     {
-        return in_array($this->status, [self::STATUS_SUBMITTED, self::STATUS_UNDER_REVIEW, self::STATUS_INFO_REQUIRED], true);
+        return in_array($this->status, [self::STATUS_PENDING, self::STATUS_SUBMITTED, self::STATUS_UNDER_REVIEW, self::STATUS_INFO_REQUIRED], true);
+    }
+
+    public function isPaid(): bool
+    {
+        if ($this->status === self::STATUS_APPROVED) {
+            return true;
+        }
+
+        if ($this->relationLoaded('payments')) {
+            return $this->payments->contains(fn ($p) => in_array($p->status, ['verified', 'paid'], true));
+        }
+
+        return $this->payments()->whereIn('status', ['verified', 'paid'])->exists();
     }
 }

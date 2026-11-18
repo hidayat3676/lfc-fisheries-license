@@ -8,6 +8,7 @@ use App\Models\LicenseCategory;
 use App\Models\Reservoir;
 use App\Services\ApplicationWorkflowService;
 use App\Services\LicensingPolicyService;
+use App\Services\PaymirService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -37,7 +38,8 @@ class ApplicationController extends Controller
     public function store(
         Request $request,
         LicensingPolicyService $policy,
-        ApplicationWorkflowService $workflow
+        ApplicationWorkflowService $workflow,
+        PaymirService $paymir
     ): JsonResponse {
         $user = $request->user()->loadMissing('citizenProfile');
         if (! $user->hasCompleteCitizenProfile()) {
@@ -48,9 +50,10 @@ class ApplicationController extends Controller
         }
 
         $data = $request->validate([
-            'reservoir_id' => ['required', 'integer', 'exists:reservoirs,id'],
+            'district_id' => ['required_without:reservoir_id', 'nullable', 'integer', 'exists:districts,id'],
+            'reservoir_id' => ['nullable', 'integer', 'exists:reservoirs,id'],
             'category_id' => ['required', 'integer', Rule::exists('license_categories', 'id')->where('is_active', true)],
-            'fishing_start_date' => ['required', 'date', 'after_or_equal:today'],
+            'fishing_start_date' => ['nullable', 'date', 'after_or_equal:today'],
             'payment_method' => ['required', Rule::in(Application::paymentMethods())],
             'payment_reference' => ['nullable', 'string', 'max:120'],
             'payment_receipt' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
@@ -58,14 +61,31 @@ class ApplicationController extends Controller
         ]);
 
         $method = $data['payment_method'] === Application::PAYMENT_METHOD_ONLINE_TRANSFER ? Application::PAYMENT_METHOD_BANK_TRANSFER : $data['payment_method'];
-        if (in_array($method, [Application::PAYMENT_METHOD_BANK_TRANSFER, Application::PAYMENT_METHOD_BANK_DEPOSIT], true)) {
+        if ($method === Application::PAYMENT_METHOD_BANK_DEPOSIT) {
             $request->validate([
                 'payment_reference' => ['required', 'string', 'max:120'],
                 'payment_receipt' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
             ]);
         }
 
-        $reservoir = Reservoir::query()->findOrFail($data['reservoir_id']);
+        if (! empty($data['reservoir_id'])) {
+            $reservoir = Reservoir::query()->findOrFail($data['reservoir_id']);
+        } else {
+            $reservoir = Reservoir::query()
+                ->where('district_id', (int) $data['district_id'])
+                ->where('is_active', true)
+                ->orderByDesc('is_open_for_licensing')
+                ->orderBy('name')
+                ->first();
+
+            if (! $reservoir) {
+                return response()->json([
+                    'message' => 'No active water bodies are available in the selected district.',
+                    'code' => 'NO_RESERVOIRS_IN_DISTRICT',
+                ], 422);
+            }
+        }
+
         if (! $reservoir->is_active || ! $reservoir->allowsELicence()) {
             return response()->json([
                 'message' => 'Water body is not open for licensing.',
@@ -81,6 +101,18 @@ class ApplicationController extends Controller
         }
 
         $category = LicenseCategory::query()->findOrFail($data['category_id']);
+        $isSeasonal = $category->duration_type === 'seasonal'
+            || in_array($category->expiry_rule, ['fixed_date', 'season_end'], true);
+
+        if ($isSeasonal) {
+            $data['fishing_start_date'] = now()->toDateString();
+        } elseif (empty($data['fishing_start_date'])) {
+            return response()->json([
+                'message' => 'The fishing start date field is required.',
+                'errors' => ['fishing_start_date' => ['The fishing start date field is required.']],
+            ], 422);
+        }
+
         $closed = $policy->isClosedOn($data['fishing_start_date'], $reservoir->id, $category->id);
         if ($closed) {
             return response()->json([
@@ -93,11 +125,11 @@ class ApplicationController extends Controller
         $receiptPath = $request->hasFile('payment_receipt')
             ? $request->file('payment_receipt')->store('receipts', 'public')
             : null;
-        $psid = $method === Application::PAYMENT_METHOD_1BILL
-            ? 'PSID-DEMO-'.strtoupper(substr(md5($user->id.'|'.$reservoir->id.'|'.now()->timestamp), 0, 10))
-            : null;
 
-        $application = DB::transaction(function () use ($user, $reservoir, $category, $data, $end, $receiptPath, $psid, $workflow, $method) {
+        $isOnline = Application::isOnlinePaymentMethod($data['payment_method']) || Application::isOnlinePaymentMethod($method);
+        $initialStatus = $isOnline ? Application::STATUS_PENDING : Application::STATUS_UNDER_REVIEW;
+
+        $application = DB::transaction(function () use ($user, $reservoir, $category, $data, $end, $receiptPath, $workflow, $method, $initialStatus) {
             $application = Application::query()->create([
                 'application_no' => $workflow->nextApplicationNo(),
                 'user_id' => $user->id,
@@ -108,11 +140,11 @@ class ApplicationController extends Controller
                 'fishing_end_date' => $end->toDateString(),
                 'fee_amount_snapshot' => $category->fee_amount,
                 'currency' => $category->currency,
-                'status' => Application::STATUS_UNDER_REVIEW,
+                'status' => $initialStatus,
                 'payment_method' => $method,
                 'payment_reference' => $data['payment_reference'] ?? null,
                 'payment_receipt_path' => $receiptPath,
-                'psid_code' => $psid,
+                'psid_code' => null,
             ]);
 
             if ($receiptPath) {
@@ -127,11 +159,18 @@ class ApplicationController extends Controller
             return $application;
         });
 
+        $paymirResult = null;
+        if ($isOnline) {
+            $paymirResult = $paymir->generatePsidForApplication($application, $user);
+        }
+
         $workflow->notifySubmitted($application);
 
         return response()->json([
             'message' => 'Application submitted',
-            'data' => $application->load(['reservoir', 'category']),
+            'psid' => $application->psid_code,
+            'paymir' => $paymirResult,
+            'data' => $application->fresh(['reservoir', 'category', 'voucher']),
         ], 201);
     }
 }

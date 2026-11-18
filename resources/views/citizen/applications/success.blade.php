@@ -611,11 +611,10 @@
 
                     <div class="row g-2 mb-2">
                         <div class="col-6">
-                            <div class="field-title">Designated Water Body</div>
-                            <div class="field-data text-primary fw-bold text-truncate" title="{{ $application->reservoir?->name }}">
-                                {{ $application->reservoir?->name }}
+                            <div class="field-title">District</div>
+                            <div class="field-data text-primary fw-bold text-truncate">
+                                {{ $application->reservoir?->district?->name ?: 'KP' }}
                             </div>
-                            <div class="text-muted" style="font-size:0.7rem">District: {{ $application->reservoir?->district?->name ?: 'KP' }}</div>
                         </div>
                         <div class="col-6">
                             <div class="field-title">Licence Category &amp; Rate</div>
@@ -810,8 +809,8 @@
                             <td class="fw-bold font-monospace text-end">{{ $application->application_no }}</td>
                         </tr>
                         <tr>
-                            <td class="text-muted">Water Body:</td>
-                            <td class="fw-bold text-end">{{ $application->reservoir?->name }}</td>
+                            <td class="text-muted">District:</td>
+                            <td class="fw-bold text-end">{{ $application->reservoir?->district?->name ?: 'KP' }}</td>
                         </tr>
                         <tr>
                             <td class="text-muted">Category:</td>

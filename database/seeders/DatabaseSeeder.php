@@ -46,6 +46,7 @@ class DatabaseSeeder extends Seeder
         );
 
         $this->call(ReservoirMasterSeeder::class);
+        $this->call(WaterBodyExcelSeeder::class);
         $this->call(LicensingSeeder::class);
         $this->call(GroupSeeder::class);
     }

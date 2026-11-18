@@ -1,15 +1,18 @@
 <?php
 
 use App\Http\Controllers\Admin\ApplicationController as AdminApplicationController;
+use App\Http\Controllers\Admin\ClosedSeasonController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\GroupController;
 use App\Http\Controllers\Admin\LicenseCategoryController;
 use App\Http\Controllers\Admin\OfficeController;
+use App\Http\Controllers\Admin\PaymirController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ReservoirController;
 use App\Http\Controllers\Admin\SetupController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\ViolationController as AdminViolationController;
+use App\Http\Controllers\Api\V1\PaymirWebhookController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -48,6 +51,9 @@ Route::get('/', function () {
     return view('welcome', compact('featuredReservoirs', 'categories', 'districts', 'totalReservoirs', 'totalDistricts'));
 })->name('home');
 
+Route::put('/UpdatePaymentDetail', [PaymirWebhookController::class, 'updatePaymentDetail'])
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
+Route::get('/reservoirs', [CatalogueController::class, 'reservoirs'])->name('reservoirs.index');
 Route::get('/water-bodies', [CatalogueController::class, 'index'])->name('catalogue.index');
 Route::get('/water-bodies/{reservoir}', [CatalogueController::class, 'show'])->name('catalogue.show');
 Route::get('/verify/licence/{token}', LicenseVerifyController::class)->name('license.verify');
@@ -87,11 +93,13 @@ Route::middleware(['auth', EnsureCitizen::class])->prefix('account')->name('citi
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/pattern-lock', [ProfileController::class, 'updatePatternLock'])->name('profile.pattern-lock');
     Route::get('/applications', [CitizenApplicationController::class, 'index'])->name('applications.index');
+    Route::get('/applications/create', [CitizenApplicationController::class, 'create'])->name('applications.apply');
+    Route::post('/applications', [CitizenApplicationController::class, 'store'])->name('applications.submit');
     Route::get('/applications/{application}', [CitizenApplicationController::class, 'show'])->name('applications.show');
     Route::get('/applications/{application}/success', [CitizenApplicationController::class, 'success'])->name('applications.success');
     Route::get('/licenses/{license}/card', LicenseCardController::class)->name('licenses.card');
-    Route::get('/water-bodies/{reservoir}/apply', [CitizenApplicationController::class, 'create'])->name('applications.create');
-    Route::post('/water-bodies/{reservoir}/apply', [CitizenApplicationController::class, 'store'])->name('applications.store');
+    Route::get('/water-bodies/{reservoir?}/apply', [CitizenApplicationController::class, 'create'])->name('applications.create');
+    Route::post('/water-bodies/{reservoir?}/apply', [CitizenApplicationController::class, 'store'])->name('applications.store');
 });
 
 Route::middleware(['auth', EnsureStaff::class])->prefix('admin')->name('admin.')->group(function () {
@@ -160,6 +168,20 @@ Route::middleware(['auth', EnsureStaff::class])->prefix('admin')->name('admin.')
         Route::put('/categories/{category}', [LicenseCategoryController::class, 'update'])->name('categories.update');
     });
 
+    Route::middleware('module:license_categories|settings,view')->group(function () {
+        Route::get('/closed-seasons', [ClosedSeasonController::class, 'index'])->name('closed-seasons.index');
+    });
+    Route::middleware('module:license_categories|settings,create|edit')->group(function () {
+        Route::get('/closed-seasons/create', [ClosedSeasonController::class, 'create'])->name('closed-seasons.create');
+        Route::post('/closed-seasons', [ClosedSeasonController::class, 'store'])->name('closed-seasons.store');
+    });
+    Route::middleware('module:license_categories|settings,edit')->group(function () {
+        Route::get('/closed-seasons/{closedSeason}/edit', [ClosedSeasonController::class, 'edit'])->name('closed-seasons.edit');
+        Route::put('/closed-seasons/{closedSeason}', [ClosedSeasonController::class, 'update'])->name('closed-seasons.update');
+        Route::post('/closed-seasons/{closedSeason}/toggle', [ClosedSeasonController::class, 'toggle'])->name('closed-seasons.toggle');
+        Route::delete('/closed-seasons/{closedSeason}', [ClosedSeasonController::class, 'destroy'])->name('closed-seasons.destroy');
+    });
+
     Route::middleware('module:applications,create')->group(function () {
         Route::get('/applications/create', [AdminApplicationController::class, 'create'])->name('applications.create');
         Route::post('/applications', [AdminApplicationController::class, 'store'])->name('applications.store');
@@ -167,11 +189,18 @@ Route::middleware(['auth', EnsureStaff::class])->prefix('admin')->name('admin.')
     Route::middleware('module:applications,view')->group(function () {
         Route::get('/applications', [AdminApplicationController::class, 'index'])->name('applications.index');
         Route::get('/applications/{application}', [AdminApplicationController::class, 'show'])->name('applications.show');
+        Route::get('/applications/{application}/card', [AdminApplicationController::class, 'card'])->name('applications.card');
     });
     Route::middleware('module:applications,approve')->group(function () {
         Route::post('/applications/{application}/approve', [AdminApplicationController::class, 'approve'])->name('applications.approve');
         Route::post('/applications/{application}/reject', [AdminApplicationController::class, 'reject'])->name('applications.reject');
         Route::post('/applications/{application}/request-info', [AdminApplicationController::class, 'requestInfo'])->name('applications.request-info');
+    });
+
+    Route::middleware('module:payments|applications|settings,view')->group(function () {
+        Route::get('/paymir', [PaymirController::class, 'index'])->name('paymir.index');
+        Route::post('/paymir/trace', [PaymirController::class, 'trace'])->name('paymir.trace');
+        Route::post('/paymir/cancel', [PaymirController::class, 'cancel'])->name('paymir.cancel');
     });
 
     Route::middleware('module:violations,view')->group(function () {

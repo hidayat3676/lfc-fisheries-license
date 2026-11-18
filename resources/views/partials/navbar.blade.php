@@ -11,7 +11,7 @@
         <div class="collapse navbar-collapse" id="mainNav">
             <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('catalogue.index') }}">
+                    <a class="nav-link" href="{{ route('reservoirs.index') }}">
                         <i class="bi bi-water me-1"></i>Water bodies
                     </a>
                 </li>

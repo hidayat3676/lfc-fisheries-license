@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Citizen;
 
 use App\Http\Controllers\Controller;
 use App\Models\Application;
+use App\Models\District;
 use App\Models\License;
 use App\Models\LicenseCategory;
 use App\Models\Reservoir;
 use App\Services\ApplicationWorkflowService;
 use App\Services\LicensingPolicyService;
+use App\Services\PaymirService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -35,57 +37,115 @@ class ApplicationController extends Controller
         return view('citizen.applications.index', compact('applications', 'licenses'));
     }
 
-    public function create(Request $request, Reservoir $reservoir, LicensingPolicyService $policy): View|RedirectResponse
-    {
-        abort_unless($reservoir->is_active, 404);
+    public function create(
+        Request $request,
+        LicensingPolicyService $policy,
+        ?Reservoir $reservoir = null
+    ): View|RedirectResponse {
+        if ($reservoir && ! $reservoir->exists) {
+            $reservoir = null;
+        }
+
+        if ($reservoir) {
+            abort_unless($reservoir->is_active, 404);
+        }
 
         $request->user()->loadMissing('citizenProfile');
         if (! $request->user()->hasCompleteCitizenProfile()) {
-            $request->session()->put('url.intended', route('citizen.applications.create', $reservoir));
+            $intended = $reservoir
+                ? route('citizen.applications.create', $reservoir)
+                : route('citizen.applications.apply');
+            $request->session()->put('url.intended', $intended);
 
             return redirect()
                 ->route('citizen.profile.edit')
                 ->with('status', 'Please complete your profile before applying for a licence.');
         }
 
-        if (! $reservoir->allowsELicence()) {
-            return redirect()
-                ->route('catalogue.show', $reservoir)
-                ->withErrors(['licensing' => 'This water body is not open for e-licence applications.']);
+        if ($reservoir) {
+            if (! $reservoir->allowsELicence()) {
+                return redirect()
+                    ->route('catalogue.show', $reservoir)
+                    ->withErrors(['licensing' => 'This water body is not open for e-licence applications.']);
+            }
+
+            if ($policy->hasValidLicense($request->user()->id, $reservoir->id)) {
+                return redirect()
+                    ->route('catalogue.show', $reservoir)
+                    ->withErrors(['licensing' => 'You already have a valid active licence for this water body. Re-applying is not allowed until your current licence expires.']);
+            }
         }
 
-        if ($policy->hasValidLicense($request->user()->id, $reservoir->id)) {
-            return redirect()
-                ->route('catalogue.show', $reservoir)
-                ->withErrors(['licensing' => 'You already have a valid active licence for this water body. Re-applying is not allowed until your current licence expires.']);
-        }
+        $districts = District::query()
+            ->where('is_active', true)
+            ->with(['reservoirs' => fn ($q) => $q->where('is_active', true)->orderBy('name')])
+            ->orderBy('name')
+            ->get();
 
         $categories = LicenseCategory::query()->active()->orderBy('fee_amount')->get();
 
+        $selectedDistrictId = $request->filled('district_id')
+            ? $request->integer('district_id')
+            : $reservoir?->district_id;
+
         return view('citizen.applications.create', [
-            'reservoir' => $reservoir->load(['district', 'office']),
+            'reservoir' => $reservoir?->load(['district', 'office']),
+            'districts' => $districts,
+            'selectedDistrictId' => $selectedDistrictId,
             'categories' => $categories,
             'paymentMethods' => [
-                'bank_transfer' => 'Online bank transfer',
-                'bank_deposit' => 'Bank deposit',
-                '1bill' => '1Bill / PSID (display only)',
+                '1bill' => 'Online Payment (PAYMIR / PSID)',
+                'bank_transfer' => 'Online bank transfer (PAYMIR / PSID)',
+                'bank_deposit' => 'Bank deposit slip',
             ],
         ]);
     }
 
     public function store(
         Request $request,
-        Reservoir $reservoir,
         LicensingPolicyService $policy,
-        ApplicationWorkflowService $workflow
+        ApplicationWorkflowService $workflow,
+        PaymirService $paymir,
+        ?Reservoir $reservoir = null
     ): RedirectResponse {
-        abort_unless($reservoir->is_active, 404);
+        if ($reservoir && ! $reservoir->exists) {
+            $reservoir = null;
+        }
+
+        if ($reservoir) {
+            abort_unless($reservoir->is_active, 404);
+        }
 
         $request->user()->loadMissing('citizenProfile');
         if (! $request->user()->hasCompleteCitizenProfile()) {
             return redirect()
                 ->route('citizen.profile.edit')
                 ->with('status', 'Please complete your profile before applying for a licence.');
+        }
+
+        $data = $request->validate([
+            'district_id' => [$reservoir ? 'nullable' : 'required', 'integer', 'exists:districts,id'],
+            'category_id' => ['required', 'integer', Rule::exists('license_categories', 'id')->where('is_active', true)],
+            'fishing_start_date' => ['nullable', 'date', 'after_or_equal:today'],
+            'payment_method' => ['required', Rule::in(Application::paymentMethods())],
+            'payment_reference' => ['nullable', 'string', 'max:120'],
+            'payment_receipt' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
+            'accept_terms' => ['accepted'],
+        ]);
+
+        if (! empty($data['district_id']) && (! $reservoir || (int) $reservoir->district_id !== (int) $data['district_id'])) {
+            $reservoir = Reservoir::query()
+                ->where('district_id', (int) $data['district_id'])
+                ->where('is_active', true)
+                ->orderByDesc('is_open_for_licensing')
+                ->orderBy('name')
+                ->first();
+
+            if (! $reservoir) {
+                throw ValidationException::withMessages([
+                    'district_id' => 'No active water bodies are available in the selected district.',
+                ]);
+            }
         }
 
         if (! $reservoir->allowsELicence()) {
@@ -100,16 +160,7 @@ class ApplicationController extends Controller
             ]);
         }
 
-        $data = $request->validate([
-            'category_id' => ['required', 'integer', Rule::exists('license_categories', 'id')->where('is_active', true)],
-            'fishing_start_date' => ['required', 'date', 'after_or_equal:today'],
-            'payment_method' => ['required', Rule::in(['bank_transfer', 'bank_deposit', '1bill'])],
-            'payment_reference' => ['nullable', 'string', 'max:120'],
-            'payment_receipt' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
-            'accept_terms' => ['accepted'],
-        ]);
-
-        if (in_array($data['payment_method'], ['bank_transfer', 'bank_deposit'], true)) {
+        if ($data['payment_method'] === Application::PAYMENT_METHOD_BANK_DEPOSIT) {
             $request->validate([
                 'payment_reference' => ['required', 'string', 'max:120'],
                 'payment_receipt' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
@@ -117,7 +168,20 @@ class ApplicationController extends Controller
         }
 
         $category = LicenseCategory::query()->findOrFail($data['category_id']);
-        $start = $data['fishing_start_date'];
+        $isSeasonal = $category->duration_type === 'seasonal'
+            || in_array($category->expiry_rule, ['fixed_date', 'season_end'], true);
+
+        if ($isSeasonal) {
+            $start = now()->toDateString();
+            $data['fishing_start_date'] = $start;
+        } else {
+            if (empty($data['fishing_start_date'])) {
+                throw ValidationException::withMessages([
+                    'fishing_start_date' => 'The fishing start date field is required.',
+                ]);
+            }
+            $start = $data['fishing_start_date'];
+        }
 
         $closed = $policy->isClosedOn($start, $reservoir->id, $category->id);
         if ($closed) {
@@ -132,11 +196,11 @@ class ApplicationController extends Controller
             $receiptPath = $request->file('payment_receipt')->store('receipts', 'public');
         }
 
-        $psid = $data['payment_method'] === '1bill'
-            ? 'PSID-DEMO-'.strtoupper(substr(md5($request->user()->id.'|'.$reservoir->id.'|'.now()->timestamp), 0, 10))
-            : null;
+        $initialStatus = Application::isOnlinePaymentMethod($data['payment_method'])
+            ? Application::STATUS_PENDING
+            : Application::STATUS_UNDER_REVIEW;
 
-        $application = DB::transaction(function () use ($request, $reservoir, $category, $data, $end, $receiptPath, $psid, $workflow) {
+        $application = DB::transaction(function () use ($request, $reservoir, $category, $data, $end, $receiptPath, $workflow, $initialStatus) {
             $application = Application::query()->create([
                 'application_no' => $workflow->nextApplicationNo(),
                 'user_id' => $request->user()->id,
@@ -146,11 +210,11 @@ class ApplicationController extends Controller
                 'fishing_end_date' => $end->toDateString(),
                 'fee_amount_snapshot' => $category->fee_amount,
                 'currency' => $category->currency,
-                'status' => Application::STATUS_UNDER_REVIEW,
+                'status' => $initialStatus,
                 'payment_method' => $data['payment_method'],
                 'payment_reference' => $data['payment_reference'] ?? null,
                 'payment_receipt_path' => $receiptPath,
-                'psid_code' => $psid,
+                'psid_code' => null,
             ]);
 
             if ($receiptPath) {
@@ -165,11 +229,17 @@ class ApplicationController extends Controller
             return $application;
         });
 
+        $statusMsg = 'Application submitted for review.';
+        if (Application::isOnlinePaymentMethod($data['payment_method'])) {
+            $paymirResult = $paymir->generatePsidForApplication($application, $request->user());
+            $statusMsg = 'Application submitted for review. PAYMIR PSID: '.$paymirResult['psid'];
+        }
+
         $workflow->notifySubmitted($application);
 
         return redirect()
             ->route('citizen.applications.success', $application)
-            ->with('status', 'Application submitted for review.');
+            ->with('status', $statusMsg);
     }
 
     public function success(Request $request, Application $application): View

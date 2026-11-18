@@ -87,6 +87,7 @@ class ReservoirController extends Controller
             'name' => ['required', 'string', 'max:190'],
             'water_body_type' => ['required', Rule::in(array_keys(config('rflms.water_body_types')))],
             'trout_type' => ['required', Rule::in(array_keys(config('rflms.trout_types')))],
+            'license_type' => ['nullable', 'string', 'max:500'],
             'description' => ['nullable', 'string'],
             'latitude' => ['nullable', 'numeric', 'between:30,37'],
             'longitude' => ['nullable', 'numeric', 'between:69,75'],

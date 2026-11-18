@@ -20,7 +20,7 @@
             </a>
         </div>
         <dl class="row mb-0">
-            <dt class="col-sm-4">Water body</dt><dd class="col-sm-8">{{ $application->reservoir?->name }}</dd>
+            <dt class="col-sm-4">District</dt><dd class="col-sm-8">{{ $application->reservoir?->district?->name ?: '—' }}</dd>
             <dt class="col-sm-4">Category</dt><dd class="col-sm-8">{{ $application->category?->name }}</dd>
             <dt class="col-sm-4">Fee paid/submitted</dt><dd class="col-sm-8">{{ number_format((float) $application->fee_amount_snapshot, 0) }} {{ $application->currency }}</dd>
             <dt class="col-sm-4">Fishing dates</dt><dd class="col-sm-8">{{ $application->fishing_start_date?->format('d M Y') }} → {{ $application->fishing_end_date?->format('d M Y') }}</dd>

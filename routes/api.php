@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\CatalogueController;
 use App\Http\Controllers\Api\V1\ExecutiveController;
 use App\Http\Controllers\Api\V1\LicenseController;
 use App\Http\Controllers\Api\V1\OfficerController;
+use App\Http\Controllers\Api\V1\PaymirWebhookController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\ViolationController;
 use Illuminate\Support\Facades\Route;
@@ -37,8 +38,14 @@ Route::prefix('v1')->group(function () {
     Route::get('/reservoirs', [CatalogueController::class, 'reservoirs']);
     Route::get('/reservoirs/{reservoir}', [CatalogueController::class, 'showReservoir']);
     Route::get('/license-categories', [CatalogueController::class, 'categories']);
+    Route::get('/license-application-data', [CatalogueController::class, 'licenseApplicationData']);
+    Route::get('/application-form-data', [CatalogueController::class, 'licenseApplicationData']);
 
     Route::post('/reports/violation', [ViolationController::class, 'store']);
+    Route::put('/UpdatePaymentDetail', [PaymirWebhookController::class, 'updatePaymentDetail']);
+    Route::put('/paymir/UpdatePaymentDetail', [PaymirWebhookController::class, 'updatePaymentDetail']);
+    Route::post('/paymir/trace', [PaymirWebhookController::class, 'trace']);
+    Route::post('/paymir/cancel', [PaymirWebhookController::class, 'cancel']);
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/auth/logout', [AuthController::class, 'logout']);
@@ -49,6 +56,7 @@ Route::prefix('v1')->group(function () {
         Route::match(['put', 'post'], '/profile', [ProfileController::class, 'update']);
         Route::post('/profile/pattern-lock', [ProfileController::class, 'updatePatternLock']);
 
+        Route::get('/licenses/application-data', [CatalogueController::class, 'licenseApplicationData']);
         Route::get('/licenses/applications', [ApplicationController::class, 'index']);
         Route::post('/licenses/applications', [ApplicationController::class, 'store']);
         Route::get('/licenses/applications/{application}', [ApplicationController::class, 'show']);
@@ -61,6 +69,7 @@ Route::prefix('v1')->group(function () {
 
         Route::middleware('staff')->prefix('officer')->group(function () {
             Route::get('/dashboard', [OfficerController::class, 'dashboard']);
+            Route::get('/application-data', [CatalogueController::class, 'licenseApplicationData']);
             Route::get('/offices', [OfficerController::class, 'offices']);
             Route::get('/offices/applications', [OfficerController::class, 'officeApplications']);
             Route::get('/offices/{office}/applications', [OfficerController::class, 'singleOfficeApplications']);

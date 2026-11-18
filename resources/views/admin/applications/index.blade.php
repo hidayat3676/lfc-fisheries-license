@@ -24,7 +24,7 @@
     <div class="col-md-3">
         <select name="status" class="form-select">
             <option value="">All statuses</option>
-            @foreach (['submitted','under_review','info_required','approved','rejected'] as $status)
+            @foreach (['pending','submitted','under_review','info_required','approved','rejected'] as $status)
                 <option value="{{ $status }}" @selected(request('status') === $status)>{{ ucfirst(str_replace('_',' ', $status)) }}</option>
             @endforeach
         </select>
@@ -49,7 +49,7 @@
                 <tr>
                     <th>Application</th>
                     <th>Citizen</th>
-                    <th>Water body</th>
+                    <th>District</th>
                     <th>Category / Fee</th>
                     <th>Status</th>
                     <th></th>
@@ -64,8 +64,7 @@
                         </td>
                         <td>{{ $app->user?->name }}</td>
                         <td>
-                            <div>{{ $app->reservoir?->name }}</div>
-                            <div class="small text-secondary">{{ $app->reservoir?->district?->name }}</div>
+                            <div class="fw-medium">{{ $app->reservoir?->district?->name ?: '—' }}</div>
                         </td>
                         <td>
                             <div>{{ $app->category?->name }}</div>
@@ -73,7 +72,14 @@
                         </td>
                         <td><span class="badge text-bg-secondary">{{ $app->statusLabel() }}</span></td>
                         <td class="text-end">
-                            <a href="{{ route('admin.applications.show', $app) }}" class="btn btn-sm btn-outline-secondary btn-chip row-action"><i class="bi bi-box-arrow-up-right"></i> Open</a>
+                            <div class="d-inline-flex gap-1">
+                                @if ($app->license)
+                                    <a href="{{ route('admin.applications.card', ['application' => $app, 'print' => 1]) }}" target="_blank" class="btn btn-sm btn-rflms btn-chip row-action" title="Print / Save Licence PDF">
+                                        <i class="bi bi-file-earmark-pdf-fill"></i> PDF
+                                    </a>
+                                @endif
+                                <a href="{{ route('admin.applications.show', $app) }}" class="btn btn-sm btn-outline-secondary btn-chip row-action"><i class="bi bi-box-arrow-up-right"></i> Open</a>
+                            </div>
                         </td>
                     </tr>
                 @empty

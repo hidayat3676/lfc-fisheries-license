@@ -75,6 +75,10 @@
                 <option value="0" @selected(old('is_open_for_licensing', $reservoir->is_open_for_licensing) === false)>No</option>
             </select>
         </div>
+        <div class="col-md-12">
+            <label class="form-label">Types of License / Permit</label>
+            <input type="text" name="license_type" class="form-control" placeholder="e.g. Daily Angling License (Non-Trout), Rod & Line Only" value="{{ old('license_type', $reservoir->license_type) }}">
+        </div>
         <div class="col-md-6">
             <label class="form-label">Latitude</label>
             <input type="text" name="latitude" class="form-control" value="{{ old('latitude', $reservoir->latitude) }}">
