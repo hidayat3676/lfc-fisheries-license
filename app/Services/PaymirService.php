@@ -262,7 +262,7 @@ Log::warning('Paymir Response ', [
         }
 
         if (! $psid) {
-            $psid = '101210'.str_pad((string) $application->id, 6, '0', STR_PAD_LEFT).now()->format('His');
+            $psid = 'FB101210'.str_pad((string) $application->id, 6, '0', STR_PAD_LEFT).now()->format('His');
         }
 
         $voucherModel = null;
