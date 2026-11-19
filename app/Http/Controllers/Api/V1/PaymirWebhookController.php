@@ -24,19 +24,19 @@ class PaymirWebhookController extends Controller
     ): JsonResponse {
         $payload = $request->all();
 
-        Log::info('PAYMIR updatePaymentDetail: request received.', [
-            'ip' => $request->ip(),
-            'method' => $request->method(),
-            'url' => $request->fullUrl(),
-            'has_payment_key_header' => $request->hasHeader('PaymentKey'),
-            'payload' => $payload,
-        ]);
+        // Log::info('PAYMIR updatePaymentDetail: request received.', [
+        //     'ip' => $request->ip(),
+        //     'method' => $request->method(),
+        //     'url' => $request->fullUrl(),
+        //     'has_payment_key_header' => $request->hasHeader('PaymentKey'),
+        //     'payload' => $payload,
+        // ]);
 
         if (empty($payload)) {
-            Log::warning('PAYMIR updatePaymentDetail: empty payload received.', [
-                'ip' => $request->ip(),
-                'raw_body' => $request->getContent(),
-            ]);
+            // Log::warning('PAYMIR updatePaymentDetail: empty payload received.', [
+            //     'ip' => $request->ip(),
+            //     'raw_body' => $request->getContent(),
+            // ]);
 
             return response()->json([
                 'responseStatus' => false,
@@ -46,10 +46,10 @@ class PaymirWebhookController extends Controller
 
         $headerKey = $request->header('PaymentKey');
         if ($headerKey !== null && $headerKey !== $paymir->paymentKey()) {
-            Log::warning('PAYMIR updatePaymentDetail: invalid PaymentKey header.', [
-                'ip' => $request->ip(),
-                'received_payment_key' => $headerKey,
-            ]);
+            // Log::warning('PAYMIR updatePaymentDetail: invalid PaymentKey header.', [
+            //     'ip' => $request->ip(),
+            //     'received_payment_key' => $headerKey,
+            // ]);
 
             return response()->json([
                 'responseStatus' => false,
@@ -66,9 +66,9 @@ class PaymirWebhookController extends Controller
         $transactionRemarks = trim((string) ($payload['TransactionRemarks'] ?? $payload['transactionRemarks'] ?? ''));
 
         if ($dptPaymentId === '' && $arcId === null) {
-            Log::warning('PAYMIR updatePaymentDetail: missing both DptPaymentID and ArcId.', [
-                'payload' => $payload,
-            ]);
+            // Log::warning('PAYMIR updatePaymentDetail: missing both DptPaymentID and ArcId.', [
+            //     'payload' => $payload,
+            // ]);
 
             return response()->json([
                 'responseStatus' => false,
@@ -93,30 +93,30 @@ class PaymirWebhookController extends Controller
                 ->first();
 
             if ($voucher) {
-                Log::info('PAYMIR updatePaymentDetail: voucher found.', [
-                    'voucher_id' => $voucher->id,
-                    'dpt_payment_id' => $voucher->dpt_payment_id,
-                    'psid' => $voucher->psid,
-                    'application_id' => $voucher->application_id,
-                    'current_status' => $voucher->status,
-                ]);
+                // Log::info('PAYMIR updatePaymentDetail: voucher found.', [
+                //     'voucher_id' => $voucher->id,
+                //     'dpt_payment_id' => $voucher->dpt_payment_id,
+                //     'psid' => $voucher->psid,
+                //     'application_id' => $voucher->application_id,
+                //     'current_status' => $voucher->status,
+                // ]);
             } else {
-                Log::warning('PAYMIR updatePaymentDetail: no voucher matched initial lookup.', [
-                    'dpt_payment_id' => $dptPaymentId,
-                    'arc_id' => $arcId,
-                ]);
+                // Log::warning('PAYMIR updatePaymentDetail: no voucher matched initial lookup.', [
+                //     'dpt_payment_id' => $dptPaymentId,
+                //     'arc_id' => $arcId,
+                // ]);
             }
         } else {
-            Log::warning('PAYMIR updatePaymentDetail: vouchers table does not exist.');
+            // Log::warning('PAYMIR updatePaymentDetail: vouchers table does not exist.');
         }
 
         $application = $voucher?->application;
         if ($application) {
-            Log::info('PAYMIR updatePaymentDetail: application resolved via voucher.', [
-                'application_id' => $application->id,
-                'application_no' => $application->application_no,
-                'current_status' => $application->status,
-            ]);
+            // Log::info('PAYMIR updatePaymentDetail: application resolved via voucher.', [
+            //     'application_id' => $application->id,
+            //     'application_no' => $application->application_no,
+            //     'current_status' => $application->status,
+            // ]);
         } elseif ($dptPaymentId !== '') {
             $application = Application::query()
                 ->where('payment_reference', $dptPaymentId)
@@ -126,41 +126,41 @@ class PaymirWebhookController extends Controller
                 ->first();
 
             if ($application) {
-                Log::info('PAYMIR updatePaymentDetail: application resolved via direct lookup.', [
-                    'application_id' => $application->id,
-                    'application_no' => $application->application_no,
-                    'current_status' => $application->status,
-                    'dpt_payment_id' => $dptPaymentId,
-                ]);
+                // Log::info('PAYMIR updatePaymentDetail: application resolved via direct lookup.', [
+                //     'application_id' => $application->id,
+                //     'application_no' => $application->application_no,
+                //     'current_status' => $application->status,
+                //     'dpt_payment_id' => $dptPaymentId,
+                // ]);
             } else {
-                Log::warning('PAYMIR updatePaymentDetail: no application matched DptPaymentID.', [
-                    'dpt_payment_id' => $dptPaymentId,
-                    'arc_id' => $arcId,
-                ]);
+                // Log::warning('PAYMIR updatePaymentDetail: no application matched DptPaymentID.', [
+                //     'dpt_payment_id' => $dptPaymentId,
+                //     'arc_id' => $arcId,
+                // ]);
             }
         }
 
         if (! $voucher && $application && Schema::hasTable('vouchers')) {
             $voucher = $application->vouchers()->latest()->first();
             if ($voucher) {
-                Log::info('PAYMIR updatePaymentDetail: voucher resolved from matched application.', [
-                    'voucher_id' => $voucher->id,
-                    'application_id' => $application->id,
-                ]);
+                // Log::info('PAYMIR updatePaymentDetail: voucher resolved from matched application.', [
+                //     'voucher_id' => $voucher->id,
+                //     'application_id' => $application->id,
+                // ]);
             }
         }
 
         $isPaid = in_array(strtolower($status), ['200', 'paid', 'success', 'successful', '1', 'true', 'verified'], true);
 
         if ($isPaid) {
-            Log::info('PAYMIR updatePaymentDetail: paid status confirmed, processing updates.', [
-                'status' => $status,
-                'dpt_payment_id' => $dptPaymentId,
-                'arc_id' => $arcId,
-                'transaction_id' => $transactionId,
-                'transaction_amount' => $transactionAmount,
-                'transaction_date' => $transactionDate,
-            ]);
+            // Log::info('PAYMIR updatePaymentDetail: paid status confirmed, processing updates.', [
+            //     'status' => $status,
+            //     'dpt_payment_id' => $dptPaymentId,
+            //     'arc_id' => $arcId,
+            //     'transaction_id' => $transactionId,
+            //     'transaction_amount' => $transactionAmount,
+            //     'transaction_date' => $transactionDate,
+            // ]);
 
             $voucherAttributes = [
                 'status_code' => 1,
@@ -188,21 +188,21 @@ class PaymirWebhookController extends Controller
 
             if ($voucher) {
                 $voucher->update($voucherAttributes);
-                Log::info('PAYMIR updatePaymentDetail: voucher marked as paid.', [
-                    'voucher_id' => $voucher->id,
-                    'dpt_payment_id' => $voucher->dpt_payment_id,
-                    'status' => $voucher->status,
-                ]);
+                // Log::info('PAYMIR updatePaymentDetail: voucher marked as paid.', [
+                //     'voucher_id' => $voucher->id,
+                //     'dpt_payment_id' => $voucher->dpt_payment_id,
+                //     'status' => $voucher->status,
+                // ]);
             }
 
             if ($application) {
                 if (Schema::hasTable('vouchers')) {
                     if ($application->vouchers()->exists()) {
                         $updatedCount = $application->vouchers()->update($voucherAttributes);
-                        Log::info('PAYMIR updatePaymentDetail: updated application vouchers to paid.', [
-                            'application_id' => $application->id,
-                            'updated_vouchers_count' => $updatedCount,
-                        ]);
+                        // Log::info('PAYMIR updatePaymentDetail: updated application vouchers to paid.', [
+                        //     'application_id' => $application->id,
+                        //     'updated_vouchers_count' => $updatedCount,
+                        // ]);
                     } elseif (! $voucher) {
                         $application->loadMissing(['user.citizenProfile', 'category']);
                         $createdVoucher = Voucher::query()->create(array_merge([
@@ -219,11 +219,11 @@ class PaymirWebhookController extends Controller
                             'fee_amount' => $application->fee_amount_snapshot ?? 0,
                         ], $voucherAttributes));
 
-                        Log::info('PAYMIR updatePaymentDetail: created missing paid voucher record for application.', [
-                            'voucher_id' => $createdVoucher->id,
-                            'application_id' => $application->id,
-                            'dpt_payment_id' => $createdVoucher->dpt_payment_id,
-                        ]);
+                        // Log::info('PAYMIR updatePaymentDetail: created missing paid voucher record for application.', [
+                        //     'voucher_id' => $createdVoucher->id,
+                        //     'application_id' => $application->id,
+                        //     'dpt_payment_id' => $createdVoucher->dpt_payment_id,
+                        // ]);
                     }
                 }
 
@@ -238,10 +238,10 @@ class PaymirWebhookController extends Controller
                     'verified_at' => now(),
                 ]);
 
-                Log::info('PAYMIR updatePaymentDetail: application payment ledger marked as verified.', [
-                    'application_id' => $application->id,
-                    'updated_payments_count' => $updatedPaymentsCount,
-                ]);
+                // Log::info('PAYMIR updatePaymentDetail: application payment ledger marked as verified.', [
+                //     'application_id' => $application->id,
+                //     'updated_payments_count' => $updatedPaymentsCount,
+                // ]);
 
                 $remarks = $transactionRemarks !== ''
                     ? 'Auto-verified via PAYMIR payment confirmation ('.$transactionRemarks.').'
@@ -249,34 +249,34 @@ class PaymirWebhookController extends Controller
 
                 $license = $workflow->approve($application, null, $remarks);
 
-                Log::info('PAYMIR updatePaymentDetail: application auto-approved and license issued.', [
-                    'application_id' => $application->id,
-                    'application_no' => $application->application_no,
-                    'license_id' => $license->id,
-                    'license_no' => $license->license_no,
-                ]);
+                // Log::info('PAYMIR updatePaymentDetail: application auto-approved and license issued.', [
+                //     'application_id' => $application->id,
+                //     'application_no' => $application->application_no,
+                //     'license_id' => $license->id,
+                //     'license_no' => $license->license_no,
+                // ]);
             } elseif (! $voucher) {
-                Log::warning('PAYMIR updatePaymentDetail: paid status received but neither voucher nor application was found in database.', [
-                    'dpt_payment_id' => $dptPaymentId,
-                    'arc_id' => $arcId,
-                    'transaction_id' => $transactionId,
-                ]);
+                // Log::warning('PAYMIR updatePaymentDetail: paid status received but neither voucher nor application was found in database.', [
+                //     'dpt_payment_id' => $dptPaymentId,
+                //     'arc_id' => $arcId,
+                //     'transaction_id' => $transactionId,
+                // ]);
             }
         } else {
-            Log::warning('PAYMIR updatePaymentDetail: non-paid status received, skipping auto-verification.', [
-                'status' => $status,
-                'dpt_payment_id' => $dptPaymentId,
-                'arc_id' => $arcId,
-                'voucher_id' => $voucher?->id,
-                'application_id' => $application?->id,
-            ]);
+            // Log::warning('PAYMIR updatePaymentDetail: non-paid status received, skipping auto-verification.', [
+            //     'status' => $status,
+            //     'dpt_payment_id' => $dptPaymentId,
+            //     'arc_id' => $arcId,
+            //     'voucher_id' => $voucher?->id,
+            //     'application_id' => $application?->id,
+            // ]);
         }
 
-        Log::info('PAYMIR updatePaymentDetail: returning success response.', [
-            'ArcId' => (string) $arcId,
-            'DptPaymentID' => $dptPaymentId,
-            'is_paid' => $isPaid,
-        ]);
+        // Log::info('PAYMIR updatePaymentDetail: returning success response.', [
+        //     'ArcId' => (string) $arcId,
+        //     'DptPaymentID' => $dptPaymentId,
+        //     'is_paid' => $isPaid,
+        // ]);
 
         return response()->json([
             'responseStatus' => true,

@@ -226,12 +226,7 @@ class PaymirService
         $body = null;
 
         try {
-            Log::info('Paymir Request ', [ 
-                'payload' => $voucherObject, 
-                'header' => $this->encodeCredentials(),
-                 $serviceKey, 
-            $this->baseUrl().'/api/DepartmentSnippet/ReceiveApplicationsArchiveDataDpt'
-        ]);
+       
             $response = Http::timeout(12)
                 ->withHeaders([
                     'Credentials' => $this->encodeCredentials(),
@@ -240,14 +235,6 @@ class PaymirService
                 ->acceptJson()
                 ->asJson()
                 ->post($this->baseUrl().'/api/DepartmentSnippet/ReceiveApplicationsArchiveDataDpt', [$voucherObject]);
-
-                Log::info('Paymir Response ', [
-                    $response->json(), 
-                    $response->headers(), 
-                    $response->status(), 
-                    $response->body(), 
-                    $this->baseUrl()
-                ]);
 
             $body = (array) $response->json();
             $archiveData = $body['archiveData'] ?? [];
