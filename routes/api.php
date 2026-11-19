@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AppController;
 use App\Http\Controllers\Api\V1\ApplicationController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CatalogueController;
@@ -11,7 +12,9 @@ use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\ViolationController;
 use Illuminate\Support\Facades\Route;
 
+
 Route::prefix('v1')->group(function () {
+    Route::get('/app/version-policy', [AppController::class, 'versionPolicy']);
     Route::get('/', function () {
         return response()->json([
             'name' => 'RFLMS API',

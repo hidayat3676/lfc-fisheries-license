@@ -60,7 +60,8 @@ class ApplicationController extends Controller
             'accept_terms' => ['accepted'],
         ]);
 
-        $method = $data['payment_method'] === Application::PAYMENT_METHOD_ONLINE_TRANSFER ? Application::PAYMENT_METHOD_BANK_TRANSFER : $data['payment_method'];
+        $method = $data['payment_method'] === Application::PAYMENT_METHOD_ONLINE_TRANSFER 
+        ? Application::PAYMENT_METHOD_BANK_TRANSFER : $data['payment_method'];
         if ($method === Application::PAYMENT_METHOD_BANK_DEPOSIT) {
             $request->validate([
                 'payment_reference' => ['required', 'string', 'max:120'],
