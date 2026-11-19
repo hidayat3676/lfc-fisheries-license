@@ -52,28 +52,39 @@ class ApplicationWorkflowService
         return sprintf('LIC-%s-%05d', $year, $count);
     }
 
-    public function approve(Application $application, User $officer, ?string $remarks = null): License
+    public function approve(Application $application, ?User $officer = null, ?string $remarks = null): License
     {
-        $license = DB::transaction(function () use ($application, $officer, $remarks) {
+        $officerId = $officer?->id;
+
+        $license = DB::transaction(function () use ($application, $officerId, $remarks) {
+            $application->loadMissing(['category', 'license']);
             $category = $application->category;
             $issueDate = now()->startOfDay();
             $expiry = $this->policy->calculateEndDate($category, $application->fishing_start_date);
 
             $application->update([
                 'status' => Application::STATUS_APPROVED,
-                'officer_remarks' => $remarks,
-                'reviewed_by' => $officer->id,
+                'officer_remarks' => $remarks ?? $application->officer_remarks,
+                'reviewed_by' => $officerId ?? $application->reviewed_by,
                 'reviewed_at' => now(),
                 'fishing_end_date' => $expiry->toDateString(),
             ]);
 
             $application->payments()
-                ->where('status', 'pending')
                 ->update([
                     'status' => 'verified',
-                    'verified_by' => $officer->id,
+                    'verified_by' => $officerId,
                     'verified_at' => now(),
                 ]);
+
+            if ($application->license) {
+                $application->license->update([
+                    'status' => License::STATUS_ACTIVE,
+                    'expiry_date' => $expiry->toDateString(),
+                ]);
+
+                return $application->license;
+            }
 
             return License::query()->create([
                 'license_no' => $this->nextLicenseNo($application),
@@ -85,11 +96,15 @@ class ApplicationWorkflowService
                 'expiry_date' => $expiry->toDateString(),
                 'status' => License::STATUS_ACTIVE,
                 'qr_token' => Str::random(40),
-                'issued_by' => $officer->id,
+                'issued_by' => $officerId,
             ]);
         });
 
-        $this->notify($application->fresh(['user', 'reservoir', 'category', 'license']), 'approved');
+        try {
+            $this->notify($application->fresh(['user', 'reservoir', 'category', 'license']), 'approved');
+        } catch (\Throwable) {
+            // Do not fail license issuance if mail transport is unavailable
+        }
 
         return $license;
     }

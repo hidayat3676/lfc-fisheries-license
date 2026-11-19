@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Application;
 use App\Models\Voucher;
+use App\Services\ApplicationWorkflowService;
 use App\Services\PaymirService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -71,8 +72,11 @@ class PaymirController extends Controller
     /**
      * PAYMIR API 1: Voucher Tracking (/api/Voucher/VoucherTrace)
      */
-    public function trace(Request $request, PaymirService $paymir): RedirectResponse
-    {
+    public function trace(
+        Request $request,
+        PaymirService $paymir,
+        ApplicationWorkflowService $workflow
+    ): RedirectResponse {
         $validated = $request->validate([
             'dpt_payment_id' => ['required', 'string', 'max:120'],
         ]);
@@ -113,26 +117,22 @@ class PaymirController extends Controller
                     $voucherUpdates['paid_at'] = $voucher->paid_at ?? now();
 
                     if ($voucher->application) {
-                        $appUpdates = [
+                        $voucher->application->update([
                             'payment_reference' => $voucherUpdates['transaction_id'] ?? $voucher->dpt_payment_id,
-                        ];
-                        if ($voucher->application->status === Application::STATUS_PENDING) {
-                            $appUpdates['status'] = Application::STATUS_SUBMITTED;
-                        }
-                        $voucher->application->update($appUpdates);
+                        ]);
 
                         $voucher->application->payments()->update([
                             'status' => 'verified',
                             'reference' => $voucherUpdates['transaction_id'] ?? $voucher->dpt_payment_id,
                             'paid_at' => now(),
-                            'meta' => array_merge(
-                                (array) ($voucher->application->payments()->latest()->first()?->meta ?? []),
-                                [
-                                    'paymir_traced_at' => now()->toIso8601String(),
-                                    'paymir_trace_data' => $data,
-                                ]
-                            ),
+                            'verified_at' => now(),
                         ]);
+
+                        $workflow->approve(
+                            $voucher->application,
+                            $request->user(),
+                            'Auto-verified via PAYMIR voucher tracking.'
+                        );
                     }
                 } elseif (strcasecmp($tracedStatus, 'Cancelled') === 0 || strcasecmp($tracedStatus, 'Canceled') === 0) {
                     $voucherUpdates['status'] = Voucher::STATUS_CANCELLED;

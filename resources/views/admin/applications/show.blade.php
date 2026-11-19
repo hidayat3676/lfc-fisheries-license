@@ -55,6 +55,16 @@
                 <dt class="col-sm-4">Fishing dates</dt><dd class="col-sm-8">{{ $application->fishing_start_date?->format('d M Y') }} → {{ $application->fishing_end_date?->format('d M Y') }}</dd>
                 <dt class="col-sm-4">Fee snapshot</dt><dd class="col-sm-8">{{ number_format((float) $application->fee_amount_snapshot, 0) }} {{ $application->currency }}</dd>
                 <dt class="col-sm-4">Payment</dt><dd class="col-sm-8">{{ str_replace('_',' ', (string) $application->payment_method) }} · {{ $application->payment_reference ?: '—' }}</dd>
+                <dt class="col-sm-4">Payment Status</dt>
+                <dd class="col-sm-8">
+                    @if ($application->voucher?->status === \App\Models\Voucher::STATUS_PAID || $application->isPaid())
+                        <span class="badge text-bg-success"><i class="bi bi-check-circle me-1"></i>Paid</span>
+                    @elseif ($application->voucher?->status === \App\Models\Voucher::STATUS_CANCELLED)
+                        <span class="badge text-bg-danger"><i class="bi bi-x-circle me-1"></i>Cancelled</span>
+                    @else
+                        <span class="badge text-bg-warning"><i class="bi bi-clock-history me-1"></i>Pending</span>
+                    @endif
+                </dd>
                 @if ($application->psid_code)
                     <dt class="col-sm-4">PSID</dt><dd class="col-sm-8">{{ $application->psid_code }}</dd>
                 @endif

@@ -297,6 +297,7 @@ class ApplicationController extends Controller
             'license.category',
             'license.application',
             'payments',
+            'voucher',
             'reviewer',
         ]);
 
