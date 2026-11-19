@@ -56,8 +56,14 @@ class Reservoir extends Model
     public function imageUrl(): ?string
     {
         if ($this->image_path) {
+            if (str_contains($this->image_path, 'images.unsplash.com')) {
+                return $this->defaultImageUrl();
+            }
             if (str_starts_with($this->image_path, 'http://') || str_starts_with($this->image_path, 'https://')) {
                 return $this->image_path;
+            }
+            if (str_starts_with($this->image_path, '/images/')) {
+                return asset(ltrim($this->image_path, '/'));
             }
 
             return \Illuminate\Support\Facades\Storage::url($this->image_path);
@@ -68,17 +74,7 @@ class Reservoir extends Model
 
     public function defaultImageUrl(): string
     {
-        if ($this->trout_type === 'trout') {
-            return 'https://images.unsplash.com/photo-1439066615861-d1af74d74000?auto=format&fit=crop&w=900&q=80';
-        }
-
-        return match ($this->water_body_type) {
-            'dam' => 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=900&q=80',
-            'river' => 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=900&q=80',
-            'stream' => 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=900&q=80',
-            'canal' => 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=900&q=80',
-            default => 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=900&q=80',
-        };
+        return asset('images/reservoir-fishing-default.jpg');
     }
 
     protected function casts(): array

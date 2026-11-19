@@ -100,7 +100,7 @@ class WaterBodyExcelSeeder extends Seeder
                     ->where('name', $item['name'])
                     ->first();
 
-                if ($hasImagePathColumn && (! $existing || empty($existing->image_path))) {
+                if ($hasImagePathColumn && (! $existing || empty($existing->image_path) || str_contains((string) $existing->image_path, 'images.unsplash.com'))) {
                     $payload['image_path'] = $this->defaultPhotoUrl(
                         $item['water_body_type'] ?? 'river',
                         $item['trout_type'] ?? 'non_trout',
@@ -121,41 +121,7 @@ class WaterBodyExcelSeeder extends Seeder
 
     private function defaultPhotoUrl(string $waterBodyType, string $troutType, int $index = 0): string
     {
-        if ($troutType === 'trout') {
-            $troutPhotos = [
-                'https://images.unsplash.com/photo-1439066615861-d1af74d74000?auto=format&fit=crop&w=900&q=80',
-                'https://images.unsplash.com/photo-1504893524553-b855bce32c67?auto=format&fit=crop&w=900&q=80',
-                'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=900&q=80',
-            ];
-
-            return $troutPhotos[$index % count($troutPhotos)];
-        }
-
-        $photosByType = [
-            'dam' => [
-                'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=900&q=80',
-                'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=900&q=80',
-            ],
-            'river' => [
-                'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=900&q=80',
-                'https://images.unsplash.com/photo-1505765050516-f72dcac9c60e?auto=format&fit=crop&w=900&q=80',
-                'https://images.unsplash.com/photo-1433086966358-54859d0ed716?auto=format&fit=crop&w=900&q=80',
-            ],
-            'stream' => [
-                'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=900&q=80',
-                'https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?auto=format&fit=crop&w=900&q=80',
-            ],
-            'canal' => [
-                'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=900&q=80',
-            ],
-            'other' => [
-                'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=900&q=80',
-            ],
-        ];
-
-        $pool = $photosByType[$waterBodyType] ?? $photosByType['river'];
-
-        return $pool[$index % count($pool)];
+        return '/images/reservoir-fishing-default.jpg';
     }
 
     private function resolveDistrict(string $rawDistrict): District
