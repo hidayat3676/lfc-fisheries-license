@@ -130,6 +130,10 @@ class CatalogueController extends Controller
                 'districts' => $districts,
                 'license_categories' => $categories,
                 'closed_seasons' => $closedSeasons,
+                'payment_methods' => [
+                    ['key' => '1bill', 'label' => '1Bill / PAYMIR PSID'],
+                    ['key' => 'cash', 'label' => 'Cash'],
+                ],
             ],
         ]);
     }

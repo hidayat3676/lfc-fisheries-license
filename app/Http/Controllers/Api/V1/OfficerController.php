@@ -205,15 +205,9 @@ class OfficerController extends Controller
             ], 422);
         }
 
-        $method = $data['payment_method'] === Application::PAYMENT_METHOD_ONLINE_TRANSFER
-            ? Application::PAYMENT_METHOD_BANK_TRANSFER
-            : ($data['payment_method'] === Application::PAYMENT_METHOD_CASH ? Application::PAYMENT_METHOD_COUNTER_CASH : $data['payment_method']);
-
-        if ($method === Application::PAYMENT_METHOD_BANK_DEPOSIT) {
-            $request->validate([
-                'payment_reference' => ['required', 'string', 'max:120'],
-            ]);
-        }
+        $method = $data['payment_method'] === Application::PAYMENT_METHOD_CASH
+            ? Application::PAYMENT_METHOD_COUNTER_CASH
+            : $data['payment_method'];
 
         if (! empty($data['reservoir_id'])) {
             $reservoir = Reservoir::query()->where('is_active', true)->findOrFail($data['reservoir_id']);

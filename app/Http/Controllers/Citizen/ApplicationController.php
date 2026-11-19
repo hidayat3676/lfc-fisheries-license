@@ -94,9 +94,8 @@ class ApplicationController extends Controller
             'selectedDistrictId' => $selectedDistrictId,
             'categories' => $categories,
             'paymentMethods' => [
-                '1bill' => 'Online Payment (PAYMIR / PSID)',
-                'bank_transfer' => 'Online bank transfer (PAYMIR / PSID)',
-                'bank_deposit' => 'Bank deposit slip',
+                '1bill' => '1Bill / PAYMIR PSID (Online Payment)',
+                'counter_cash' => 'Cash',
             ],
         ]);
     }
@@ -160,11 +159,8 @@ class ApplicationController extends Controller
             ]);
         }
 
-        if ($data['payment_method'] === Application::PAYMENT_METHOD_BANK_DEPOSIT) {
-            $request->validate([
-                'payment_reference' => ['required', 'string', 'max:120'],
-                'payment_receipt' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:4096'],
-            ]);
+        if ($data['payment_method'] === Application::PAYMENT_METHOD_CASH) {
+            $data['payment_method'] = Application::PAYMENT_METHOD_COUNTER_CASH;
         }
 
         $category = LicenseCategory::query()->findOrFail($data['category_id']);

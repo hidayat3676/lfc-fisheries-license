@@ -85,10 +85,8 @@ class ApplicationController extends Controller
             'districts' => $districts,
             'licensingDistricts' => $licensingDistricts,
             'paymentMethods' => [
-                'counter_cash' => 'Counter Cash Payment (Instant Issue)',
-                '1bill' => 'Online Payment (PAYMIR / 1Bill PSID)',
-                'bank_transfer' => 'Online Bank Transfer (PAYMIR / PSID)',
-                'bank_deposit' => 'Bank Deposit Slip',
+                '1bill' => '1Bill / PAYMIR PSID (Online Payment)',
+                'counter_cash' => 'Cash (Counter Cash Payment)',
             ],
         ]);
     }

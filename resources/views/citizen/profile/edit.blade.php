@@ -25,7 +25,10 @@
                 </div>
             @endif
             <div class="flex-grow-1">
-                <label class="form-label mb-1 fw-bold">Profile Picture <span class="text-muted small fw-normal">(Shown on Licence Card)</span></label>
+                <label class="form-label mb-1 fw-bold d-flex justify-content-between align-items-center">
+                    <span>Profile Picture <span class="text-muted small fw-normal">(Shown on Licence Card)</span></span>
+                    <span dir="rtl" lang="ur" class="text-secondary fw-semibold">تصویر (لائسنس کارڈ کے لیے)</span>
+                </label>
                 <input type="file" name="photo" accept="image/jpeg,image/png,image/jpg,image/webp" class="form-control @error('photo') is-invalid @enderror">
                 <div class="form-text small mb-0">Upload clear passport size or face photo (JPG, PNG, max 2MB).</div>
                 @error('photo') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
@@ -34,37 +37,55 @@
 
         <div class="row g-3">
             <div class="col-md-6">
-                <label class="form-label">Full name</label>
+                <label class="form-label d-flex justify-content-between align-items-center">
+                    <span>Full name</span>
+                    <span dir="rtl" lang="ur" class="text-secondary">پورا نام</span>
+                </label>
                 <input type="text" name="full_name" class="form-control @error('full_name') is-invalid @enderror" required
                        value="{{ old('full_name', $profile?->full_name ?? $user->name) }}">
                 @error('full_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
             <div class="col-md-6">
-                <label class="form-label">Father name</label>
+                <label class="form-label d-flex justify-content-between align-items-center">
+                    <span>Father name</span>
+                    <span dir="rtl" lang="ur" class="text-secondary">والد کا نام</span>
+                </label>
                 <input type="text" name="father_name" class="form-control @error('father_name') is-invalid @enderror" required
                        value="{{ old('father_name', $profile?->father_name) }}">
                 @error('father_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
             <div class="col-md-6">
-                <label class="form-label">CNIC</label>
+                <label class="form-label d-flex justify-content-between align-items-center">
+                    <span>CNIC</span>
+                    <span dir="rtl" lang="ur" class="text-secondary">شناختی کارڈ نمبر</span>
+                </label>
                 <input type="text" name="cnic" class="form-control @error('cnic') is-invalid @enderror" required
                        placeholder="12345-1234567-1" value="{{ old('cnic', $profile?->cnic) }}">
                 @error('cnic') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
             <div class="col-md-6">
-                <label class="form-label">Mobile</label>
+                <label class="form-label d-flex justify-content-between align-items-center">
+                    <span>Mobile</span>
+                    <span dir="rtl" lang="ur" class="text-secondary">موبائل نمبر</span>
+                </label>
                 <input type="text" name="mobile" class="form-control @error('mobile') is-invalid @enderror" required
                        value="{{ old('mobile', $user->mobile) }}">
                 @error('mobile') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
             <div class="col-md-4">
-                <label class="form-label">Date of birth</label>
+                <label class="form-label d-flex justify-content-between align-items-center">
+                    <span>Date of birth</span>
+                    <span dir="rtl" lang="ur" class="text-secondary">تاریخِ پیدائش</span>
+                </label>
                 <input type="date" name="dob" class="form-control @error('dob') is-invalid @enderror" required
                        value="{{ old('dob', optional($profile?->dob)->toDateString()) }}">
                 @error('dob') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
             <div class="col-md-4">
-                <label class="form-label">Gender</label>
+                <label class="form-label d-flex justify-content-between align-items-center">
+                    <span>Gender</span>
+                    <span dir="rtl" lang="ur" class="text-secondary">جنس</span>
+                </label>
                 <select name="gender" class="form-select @error('gender') is-invalid @enderror" required>
                     <option value="">Select</option>
                     @foreach (['male','female','other'] as $g)
@@ -74,13 +95,19 @@
                 @error('gender') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
             <div class="col-md-4">
-                <label class="form-label">Province</label>
+                <label class="form-label d-flex justify-content-between align-items-center">
+                    <span>Province</span>
+                    <span dir="rtl" lang="ur" class="text-secondary">صوبہ</span>
+                </label>
                 <input type="text" name="province" class="form-control @error('province') is-invalid @enderror" required
                        value="{{ old('province', $profile?->province ?? 'Khyber Pakhtunkhwa') }}">
                 @error('province') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
             <div class="col-md-6">
-                <label class="form-label">Residence district</label>
+                <label class="form-label d-flex justify-content-between align-items-center">
+                    <span>Residence district</span>
+                    <span dir="rtl" lang="ur" class="text-secondary">رہائشی ضلع</span>
+                </label>
                 <select name="residence_district_id" class="form-select @error('residence_district_id') is-invalid @enderror" required>
                     <option value="">Select district</option>
                     @foreach ($districts as $district)
@@ -90,18 +117,24 @@
                 @error('residence_district_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
             <div class="col-md-6">
-                <label class="form-label">Emergency contact</label>
+                <label class="form-label d-flex justify-content-between align-items-center">
+                    <span>Emergency contact</span>
+                    <span dir="rtl" lang="ur" class="text-secondary">ہنگامی رابطہ نمبر</span>
+                </label>
                 <input type="text" name="emergency_contact" class="form-control @error('emergency_contact') is-invalid @enderror" required
                        value="{{ old('emergency_contact', $profile?->emergency_contact) }}">
                 @error('emergency_contact') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
             <div class="col-12">
-                <label class="form-label">Address</label>
+                <label class="form-label d-flex justify-content-between align-items-center">
+                    <span>Address</span>
+                    <span dir="rtl" lang="ur" class="text-secondary">مکمل پتہ</span>
+                </label>
                 <textarea name="address" class="form-control @error('address') is-invalid @enderror" rows="2" required>{{ old('address', $profile?->address) }}</textarea>
                 @error('address') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
         </div>
-        <button class="btn btn-rflms mt-3" type="submit">Save profile</button>
+        <button class="btn btn-rflms mt-3" type="submit">Save profile <span dir="rtl" lang="ur" class="ms-1">(معلومات محفوظ کریں)</span></button>
     </form>
 
     <!-- Pattern Lock Security Settings Card -->

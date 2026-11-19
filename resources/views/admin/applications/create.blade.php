@@ -257,7 +257,7 @@
 
                     <div class="mb-3">
                         <label class="form-label" for="payment_reference">Payment Reference / Cash Receipt No.</label>
-                        <input type="text" name="payment_reference" id="payment_reference" value="{{ old('payment_reference') }}" class="form-control @error('payment_reference') is-invalid @enderror" placeholder="Counter receipt / Bank reference">
+                        <input type="text" name="payment_reference" id="payment_reference" value="{{ old('payment_reference') }}" class="form-control @error('payment_reference') is-invalid @enderror" placeholder="Counter cash receipt no. (optional)">
                         @error('payment_reference') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 

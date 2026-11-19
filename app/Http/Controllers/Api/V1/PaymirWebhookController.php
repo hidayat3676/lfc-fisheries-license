@@ -8,6 +8,7 @@ use App\Models\Voucher;
 use App\Services\PaymirService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 
 class PaymirWebhookController extends Controller
@@ -76,7 +77,9 @@ class PaymirWebhookController extends Controller
                     'paid_at' => now(),
                 ]);
             }
-
+            
+            Log::info('Payment successfull!', ['voucher' => $voucher]);
+            
             if ($application) {
                 $application->payments()
                     ->where('status', 'pending')

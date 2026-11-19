@@ -42,14 +42,18 @@
                   x-data="{ method: '{{ old('payment_method', '1bill') }}' }">
                 @csrf
 
-                <h2 class="h6 fw-bold mb-3 text-dark border-bottom pb-2">
-                    <i class="bi bi-pen-fill text-primary me-1"></i> Application Details
+                <h2 class="h6 fw-bold mb-3 text-dark border-bottom pb-2 d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-pen-fill text-primary me-1"></i> Application Details</span>
+                    <span dir="rtl" lang="ur" class="fw-normal text-secondary">درخواست کی تفصیلات</span>
                 </h2>
 
                 <div class="mb-3">
-                    <label class="form-label fw-semibold" for="district_id">District <span class="text-danger">*</span></label>
+                    <label class="form-label fw-semibold d-flex justify-content-between align-items-center" for="district_id">
+                        <span>District <span class="text-danger">*</span></span>
+                        <span dir="rtl" lang="ur" class="text-secondary">ضلع <span class="text-danger">*</span></span>
+                    </label>
                     <select name="district_id" id="district_id" class="form-select form-select-lg @error('district_id') is-invalid @enderror" required onchange="renderDistrictWaterBodies()">
-                        <option value="">-- Select District --</option>
+                        <option value="">-- Select District / ضلع منتخب کریں --</option>
                         @foreach ($districts as $d)
                             <option value="{{ $d->id }}" @selected(old('district_id', $selectedDistrictId) == $d->id)>
                                 {{ $d->name }}
@@ -61,7 +65,7 @@
 
                 <div class="mb-3">
                     <label class="form-label fw-semibold d-flex justify-content-between align-items-center mb-1">
-                        <span>Available Water Bodies in District</span>
+                        <span>Available Water Bodies in District <span class="text-secondary fw-normal" dir="rtl" lang="ur">(ضلع میں دستیاب آبی ذخائر)</span></span>
                         <span class="badge text-bg-light border text-secondary fw-normal" id="waterBodiesCountBadge">0 available</span>
                     </label>
                     <div id="districtWaterBodiesBox" class="p-3 bg-light rounded-3 border small" style="max-height: 260px; overflow-y: auto;">
@@ -74,9 +78,12 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-semibold" for="category_id">Licence Category &amp; Duration <span class="text-danger">*</span></label>
+                    <label class="form-label fw-semibold d-flex justify-content-between align-items-center" for="category_id">
+                        <span>Licence Category &amp; Duration <span class="text-danger">*</span></span>
+                        <span dir="rtl" lang="ur" class="text-secondary">لائسنس کی قسم اور مدت <span class="text-danger">*</span></span>
+                    </label>
                     <select name="category_id" id="category_id" class="form-select form-select-lg @error('category_id') is-invalid @enderror" required onchange="handleCategoryChange()">
-                        <option value="">-- Select Licence Category --</option>
+                        <option value="">-- Select Licence Category / لائسنس کی قسم منتخب کریں --</option>
                         @foreach ($categories as $category)
                             <option value="{{ $category->id }}" @selected(old('category_id') == $category->id)>
                                 {{ $category->name }} — {{ $category->feeLabel() }} ({{ $category->duration_days ? $category->duration_days.' Days' : ucfirst($category->duration_type) }})
@@ -88,7 +95,10 @@
                 </div>
 
                 <div class="mb-3" id="dailyStartDateBlock">
-                    <label class="form-label fw-semibold" for="fishing_start_date">Fishing Start Date <span class="text-danger">*</span></label>
+                    <label class="form-label fw-semibold d-flex justify-content-between align-items-center" for="fishing_start_date">
+                        <span>Fishing Start Date <span class="text-danger">*</span></span>
+                        <span dir="rtl" lang="ur" class="text-secondary">شکار شروع کرنے کی تاریخ <span class="text-danger">*</span></span>
+                    </label>
                     <input type="date" name="fishing_start_date" id="fishing_start_date" class="form-control form-control-lg" required
                            min="{{ now()->toDateString() }}" value="{{ old('fishing_start_date', now()->toDateString()) }}">
                     <div class="form-text small">Expiry date will be calculated automatically based on your selected category duration.</div>
@@ -97,11 +107,17 @@
                 <div class="mb-3 d-none" id="seasonalDatesBlock">
                     <div class="row g-2">
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold" for="seasonal_from_date">From Date (Current Date)</label>
+                            <label class="form-label fw-semibold d-flex justify-content-between align-items-center" for="seasonal_from_date">
+                                <span>From Date (Current Date)</span>
+                                <span dir="rtl" lang="ur" class="text-secondary small">تاریخِ آغاز</span>
+                            </label>
                             <input type="date" id="seasonal_from_date" value="{{ now()->toDateString() }}" class="form-control form-control-lg bg-light" readonly>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold" for="seasonal_end_date">End Date (Closed Season)</label>
+                            <label class="form-label fw-semibold d-flex justify-content-between align-items-center" for="seasonal_end_date">
+                                <span>End Date (Closed Season)</span>
+                                <span dir="rtl" lang="ur" class="text-secondary small">آخری تاریخ</span>
+                            </label>
                             <input type="date" id="seasonal_end_date" value="" class="form-control form-control-lg bg-light" readonly>
                         </div>
                     </div>
@@ -112,7 +128,10 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">Payment Method</label>
+                    <label class="form-label fw-semibold d-flex justify-content-between align-items-center">
+                        <span>Payment Method <span class="text-danger">*</span></span>
+                        <span dir="rtl" lang="ur" class="text-secondary">ادائیگی کا طریقہ <span class="text-danger">*</span></span>
+                    </label>
                     <select name="payment_method" class="form-select form-select-lg" x-model="method" required>
                         @foreach ($paymentMethods as $key => $label)
                             <option value="{{ $key }}">{{ $label }}</option>
@@ -120,32 +139,28 @@
                     </select>
                 </div>
 
-                <div class="mb-3" x-show="method === '1bill' || method === 'bank_transfer'">
+                <div class="mb-3" x-show="method === '1bill'">
                     <div class="alert alert-info small mb-0 rounded-3">
-                        <i class="bi bi-info-circle-fill me-1"></i> An official <strong>PAYMIR PSID</strong> voucher will be generated automatically upon submission so you can complete your online payment via PAYMIR / 1Bill.
+                        <i class="bi bi-info-circle-fill me-1"></i> An official <strong>PAYMIR PSID</strong> voucher will be generated automatically upon submission so you can complete your online payment via 1Bill / PAYMIR.
                     </div>
                 </div>
 
-                <div class="mb-3" x-show="method === 'bank_deposit'">
-                    <label class="form-label fw-semibold">Transaction / Deposit Reference No.</label>
-                    <input type="text" name="payment_reference" class="form-control" placeholder="e.g. TRX-99882211" value="{{ old('payment_reference') }}">
-                </div>
-
-                <div class="mb-3" x-show="method === 'bank_deposit'">
-                    <label class="form-label fw-semibold">Upload Payment Receipt Proof (JPG, PNG, PDF)</label>
-                    <input type="file" name="payment_receipt" class="form-control" accept=".jpg,.jpeg,.png,.pdf">
-                    <div class="form-text small">Maximum file size: 4MB. Upload clear image or PDF of bank deposit slip.</div>
+                <div class="mb-3" x-show="method === 'counter_cash' || method === 'cash'">
+                    <div class="alert alert-secondary small mb-0 rounded-3">
+                        <i class="bi bi-cash-coin me-1"></i> Pay cash at the nearest Fisheries Office counter for verification and licence issuance.
+                    </div>
                 </div>
 
                 <div class="form-check mb-4 pt-2 border-top">
                     <input class="form-check-input" type="checkbox" name="accept_terms" value="1" id="accept_terms" required>
                     <label class="form-check-label small" for="accept_terms">
                         I hereby declare that the details provided are correct and I agree to abide by the KP Fisheries Conservation Laws and angling regulations for <strong id="selectedDistrictTermsLabel">{{ $reservoir?->name ?? 'the selected district water bodies' }}</strong>.
+                        <span class="d-block text-secondary mt-1" dir="rtl" lang="ur">میں اقرار کرتا/کرتی ہوں کہ فراہم کردہ تمام معلومات درست ہیں اور میں خیبر پختونخوا فشریز کے قوانین و ضوابط کی پابندی کروں گا/گی۔</span>
                     </label>
                 </div>
 
                 <button class="btn btn-rflms btn-lg w-100 py-2.5 fw-bold" type="submit">
-                    <i class="bi bi-send-fill me-1"></i> Submit Licence Application
+                    <i class="bi bi-send-fill me-1"></i> Submit Licence Application <span dir="rtl" lang="ur" class="ms-1">(درخواست جمع کروائیں)</span>
                 </button>
             </form>
         </div>

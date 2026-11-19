@@ -51,8 +51,8 @@ Route::get('/', function () {
     return view('welcome', compact('featuredReservoirs', 'categories', 'districts', 'totalReservoirs', 'totalDistricts'));
 })->name('home');
 
-Route::put('/UpdatePaymentDetail', [PaymirWebhookController::class, 'updatePaymentDetail'])
-    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
+// Route::put('/UpdatePaymentDetail', [PaymirWebhookController::class, 'updatePaymentDetail'])
+    // ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
 Route::get('/reservoirs', [CatalogueController::class, 'reservoirs'])->name('reservoirs.index');
 Route::get('/water-bodies', [CatalogueController::class, 'index'])->name('catalogue.index');
 Route::get('/water-bodies/{reservoir}', [CatalogueController::class, 'show'])->name('catalogue.show');

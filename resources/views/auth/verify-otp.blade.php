@@ -65,7 +65,10 @@
                     @csrf
                     <!-- 6-digit OTP -->
                     <div class="mb-3">
-                        <label class="form-label text-dark fw-semibold small" for="otp">6-Digit Verification Code</label>
+                        <label class="form-label text-dark fw-semibold small d-flex justify-content-between align-items-center" for="otp">
+                            <span>6-Digit Verification Code</span>
+                            <span dir="rtl" lang="ur" class="text-secondary">6 ہندسوں کا تصدیقی کوڈ</span>
+                        </label>
                         <div class="input-group input-aquatic-group">
                             <span class="input-group-text"><i class="bi bi-key"></i></span>
                             <input id="otp" type="text" name="otp" inputmode="numeric" maxlength="6" class="form-control text-center fw-bold fs-5 @error('otp') is-invalid @enderror" placeholder="••••••" required autofocus style="letter-spacing:.3em">
@@ -75,7 +78,10 @@
 
                     <!-- Create Password -->
                     <div class="mb-3">
-                        <label class="form-label text-dark fw-semibold small" for="password">Create Password</label>
+                        <label class="form-label text-dark fw-semibold small d-flex justify-content-between align-items-center" for="password">
+                            <span>Create Password</span>
+                            <span dir="rtl" lang="ur" class="text-secondary">پاس ورڈ بنائیں</span>
+                        </label>
                         <div class="input-group input-aquatic-group">
                             <span class="input-group-text"><i class="bi bi-lock"></i></span>
                             <input id="password" type="password" name="password" class="form-control @error('password') is-invalid @enderror" placeholder="••••••••" required minlength="8">
@@ -85,7 +91,10 @@
 
                     <!-- Confirm Password -->
                     <div class="mb-4">
-                        <label class="form-label text-dark fw-semibold small" for="password_confirmation">Confirm Password</label>
+                        <label class="form-label text-dark fw-semibold small d-flex justify-content-between align-items-center" for="password_confirmation">
+                            <span>Confirm Password</span>
+                            <span dir="rtl" lang="ur" class="text-secondary">پاس ورڈ کی تصدیق کریں</span>
+                        </label>
                         <div class="input-group input-aquatic-group">
                             <span class="input-group-text"><i class="bi bi-shield-check"></i></span>
                             <input id="password_confirmation" type="password" name="password_confirmation" class="form-control" placeholder="••••••••" required minlength="8">
@@ -93,7 +102,7 @@
                     </div>
 
                     <button class="btn btn-aquatic-submit w-100" type="submit">
-                        <i class="bi bi-check-circle me-1"></i> Verify & Complete Registration
+                        <i class="bi bi-check-circle me-1"></i> Verify &amp; Complete Registration <span dir="rtl" lang="ur" class="ms-1">(تصدیق اور رجسٹریشن مکمل کریں)</span>
                     </button>
                 </form>
 

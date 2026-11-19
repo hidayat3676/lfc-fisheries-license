@@ -63,7 +63,10 @@
                     @csrf
                     <!-- Full Name -->
                     <div class="mb-3">
-                        <label class="form-label text-dark fw-semibold small" for="name">Full Name</label>
+                        <label class="form-label text-dark fw-semibold small d-flex justify-content-between align-items-center" for="name">
+                            <span>Full Name</span>
+                            <span dir="rtl" lang="ur" class="text-secondary">پورا نام</span>
+                        </label>
                         <div class="input-group input-aquatic-group">
                             <span class="input-group-text"><i class="bi bi-person"></i></span>
                             <input id="name" type="text" name="name" value="{{ old('name') }}" class="form-control @error('name') is-invalid @enderror" placeholder="e.g. Muhammad Ali" required autofocus>
@@ -73,7 +76,10 @@
 
                     <!-- Email Address -->
                     <div class="mb-3">
-                        <label class="form-label text-dark fw-semibold small" for="email">Email Address</label>
+                        <label class="form-label text-dark fw-semibold small d-flex justify-content-between align-items-center" for="email">
+                            <span>Email Address</span>
+                            <span dir="rtl" lang="ur" class="text-secondary">ای میل ایڈریس</span>
+                        </label>
                         <div class="input-group input-aquatic-group">
                             <span class="input-group-text"><i class="bi bi-envelope"></i></span>
                             <input id="email" type="email" name="email" value="{{ old('email') }}" class="form-control @error('email') is-invalid @enderror" placeholder="name@example.com" required>
@@ -83,7 +89,10 @@
 
                     <!-- CNIC Number -->
                     <div class="mb-3">
-                        <label class="form-label text-dark fw-semibold small" for="cnic">CNIC Number</label>
+                        <label class="form-label text-dark fw-semibold small d-flex justify-content-between align-items-center" for="cnic">
+                            <span>CNIC Number</span>
+                            <span dir="rtl" lang="ur" class="text-secondary">شناختی کارڈ نمبر</span>
+                        </label>
                         <div class="input-group input-aquatic-group">
                             <span class="input-group-text"><i class="bi bi-card-heading"></i></span>
                             <input id="cnic" type="text" name="cnic" value="{{ old('cnic') }}" class="form-control @error('cnic') is-invalid @enderror" placeholder="12345-1234567-1" required maxlength="15" autocomplete="off" inputmode="numeric">
@@ -94,8 +103,9 @@
 
                     <!-- Profile Picture (For Digital Licence Card) -->
                     <div class="mb-4">
-                        <label class="form-label text-dark fw-semibold small mb-1" for="photo">
-                            Profile Picture <span class="text-muted fw-normal">(For Licence Card)</span>
+                        <label class="form-label text-dark fw-semibold small mb-1 d-flex justify-content-between align-items-center" for="photo">
+                            <span>Profile Picture <span class="text-muted fw-normal">(For Licence Card)</span></span>
+                            <span dir="rtl" lang="ur" class="text-secondary">تصویر (لائسنس کارڈ کے لیے)</span>
                         </label>
                         <div class="input-group input-aquatic-group">
                             <span class="input-group-text"><i class="bi bi-camera"></i></span>
@@ -107,7 +117,7 @@
 
                     <!-- Submit Button -->
                     <button class="btn btn-aquatic-submit w-100" type="submit">
-                        <i class="bi bi-send-check me-1"></i> Send Verification Code
+                        <i class="bi bi-send-check me-1"></i> Send Verification Code <span dir="rtl" lang="ur" class="ms-1">(تصدیقی کوڈ بھیجیں)</span>
                     </button>
                 </form>
 

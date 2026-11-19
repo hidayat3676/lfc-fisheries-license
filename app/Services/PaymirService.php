@@ -226,8 +226,12 @@ class PaymirService
         $body = null;
 
         try {
-            Log::info('Paymir Request ', [$voucherObject, $this->encodeCredentials(), $serviceKey, 
-            $this->baseUrl().'/api/DepartmentSnippet/ReceiveApplicationsArchiveDataDpt']);
+            Log::info('Paymir Request ', [ 
+                'payload' => $voucherObject, 
+                'header' => $this->encodeCredentials(),
+                 $serviceKey, 
+            $this->baseUrl().'/api/DepartmentSnippet/ReceiveApplicationsArchiveDataDpt'
+        ]);
             $response = Http::timeout(12)
                 ->withHeaders([
                     'Credentials' => $this->encodeCredentials(),
