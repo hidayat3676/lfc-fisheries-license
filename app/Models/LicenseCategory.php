@@ -11,6 +11,7 @@ class LicenseCategory extends Model
     protected $fillable = [
         'code',
         'name',
+        'urdu_name',
         'description',
         'duration_type',
         'duration_days',

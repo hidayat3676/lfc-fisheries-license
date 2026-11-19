@@ -28,6 +28,7 @@ class CatalogueController extends Controller
                 return [
                     'id' => $district->id,
                     'name' => $district->name,
+                    'urdu_name' => $district->urdu_name,
                     'code' => $district->code,
                     'reservoirs' => $district->reservoirs->map(function (Reservoir $r) {
                         $lat = $r->latitude ?? $r->start_lat;
@@ -79,6 +80,7 @@ class CatalogueController extends Controller
                     'id' => $cat->id,
                     'code' => $cat->code,
                     'name' => $cat->name,
+                    'urdu_name' => $cat->urdu_name,
                     'description' => $cat->description,
                     'duration_type' => $cat->duration_type,
                     'duration_days' => $cat->duration_days,
@@ -143,7 +145,7 @@ class CatalogueController extends Controller
         $districts = District::query()
             ->where('is_active', true)
             ->orderBy('name')
-            ->get(['id', 'name', 'code']);
+            ->get(['id', 'name', 'urdu_name', 'code']);
 
         return response()->json(['data' => $districts]);
     }
@@ -192,7 +194,7 @@ class CatalogueController extends Controller
             ->active()
             ->orderBy('fee_amount')
             ->get([
-                'id', 'code', 'name', 'description', 'duration_type', 'duration_days',
+                'id', 'code', 'name', 'urdu_name', 'description', 'duration_type', 'duration_days',
                 'fee_amount', 'currency', 'expiry_rule', 'fixed_expiry_month_day',
                 'instructions', 'terms',
             ]);

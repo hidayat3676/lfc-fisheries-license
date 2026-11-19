@@ -128,7 +128,7 @@
                                 <select name="residence_district_id" id="residence_district_id" class="form-select @error('residence_district_id') is-invalid @enderror">
                                     <option value="">Select District</option>
                                     @foreach ($districts as $d)
-                                        <option value="{{ $d->id }}" @selected(old('residence_district_id') == $d->id)>{{ $d->name }}</option>
+                                        <option value="{{ $d->id }}" @selected(old('residence_district_id') == $d->id)>{{ $d->name }}{{ $d->urdu_name ? ' ('.$d->urdu_name.')' : '' }}</option>
                                     @endforeach
                                 </select>
                                 @error('residence_district_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -180,7 +180,7 @@
                             <option value="">-- Select District --</option>
                             @foreach (($licensingDistricts ?? $districts) as $d)
                                 <option value="{{ $d->id }}" @selected(old('district_id') == $d->id)>
-                                    {{ $d->name }}
+                                    {{ $d->name }}{{ $d->urdu_name ? ' ('.$d->urdu_name.')' : '' }}
                                 </option>
                             @endforeach
                         </select>
@@ -207,7 +207,7 @@
                             <option value="">-- Select Category --</option>
                             @foreach ($categories as $cat)
                                 <option value="{{ $cat->id }}" @selected(old('category_id') == $cat->id)>
-                                    {{ $cat->name }} — {{ number_format((float)$cat->fee_amount, 0) }} {{ $cat->currency }} ({{ $cat->duration_days ? $cat->duration_days.' days' : ucfirst($cat->duration_type) }})
+                                    {{ $cat->name }}{{ $cat->urdu_name ? ' ('.$cat->urdu_name.')' : '' }} — {{ number_format((float)$cat->fee_amount, 0) }} {{ $cat->currency }} ({{ $cat->duration_days ? $cat->duration_days.' days' : ucfirst($cat->duration_type) }})
                                 </option>
                             @endforeach
                         </select>

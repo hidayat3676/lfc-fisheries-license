@@ -56,7 +56,7 @@
                         <option value="">-- Select District / ضلع منتخب کریں --</option>
                         @foreach ($districts as $d)
                             <option value="{{ $d->id }}" @selected(old('district_id', $selectedDistrictId) == $d->id)>
-                                {{ $d->name }}
+                                {{ $d->name }}{{ $d->urdu_name ? ' ('.$d->urdu_name.')' : '' }}
                             </option>
                         @endforeach
                     </select>
@@ -86,7 +86,7 @@
                         <option value="">-- Select Licence Category / لائسنس کی قسم منتخب کریں --</option>
                         @foreach ($categories as $category)
                             <option value="{{ $category->id }}" @selected(old('category_id') == $category->id)>
-                                {{ $category->name }} — {{ $category->feeLabel() }} ({{ $category->duration_days ? $category->duration_days.' Days' : ucfirst($category->duration_type) }})
+                                {{ $category->name }}{{ $category->urdu_name ? ' ('.$category->urdu_name.')' : '' }} — {{ $category->feeLabel() }} ({{ $category->duration_days ? $category->duration_days.' Days' : ucfirst($category->duration_type) }})
                             </option>
                         @endforeach
                     </select>

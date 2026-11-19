@@ -10,6 +10,7 @@ class District extends Model
 {
     protected $fillable = [
         'name',
+        'urdu_name',
         'code',
         'is_active',
     ];

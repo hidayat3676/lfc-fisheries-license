@@ -16,9 +16,16 @@
             <label class="form-label">Code</label>
             <input type="text" name="code" class="form-control" required value="{{ old('code', $category->code) }}">
         </div>
-        <div class="col-md-8">
-            <label class="form-label">Name</label>
+        <div class="col-md-4">
+            <label class="form-label">Name (English)</label>
             <input type="text" name="name" class="form-control" required value="{{ old('name', $category->name) }}">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label d-flex justify-content-between align-items-center">
+                <span>Urdu Name</span>
+                <span dir="rtl" lang="ur" class="text-secondary small">اردو نام</span>
+            </label>
+            <input type="text" name="urdu_name" dir="rtl" lang="ur" class="form-control" placeholder="مثلاً یومیہ لائسنس" value="{{ old('urdu_name', $category->urdu_name) }}">
         </div>
         <div class="col-12">
             <label class="form-label">Description</label>

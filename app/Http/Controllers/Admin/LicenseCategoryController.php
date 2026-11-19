@@ -63,6 +63,7 @@ class LicenseCategoryController extends Controller
         $data = $request->validate([
             'code' => ['required', 'string', 'max:32', Rule::unique('license_categories', 'code')->ignore($category?->id)],
             'name' => ['required', 'string', 'max:120'],
+            'urdu_name' => ['nullable', 'string', 'max:120'],
             'description' => ['nullable', 'string'],
             'duration_type' => ['required', Rule::in(['daily', 'weekly', 'monthly', 'seasonal', 'custom'])],
             'duration_days' => ['nullable', 'integer', 'min:1', 'max:400'],
