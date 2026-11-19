@@ -54,9 +54,9 @@ class AppController extends Controller
         //
         // -----------------------------------------------------
 
-        $minimumSupportedVersionCode = 3;
+        $minimumSupportedVersionCode = 1;
 
-        $latestVersionCode = 3;
+        $latestVersionCode = 1;
 
         // =====================================================
         // UPDATE MESSAGE
