@@ -90,7 +90,7 @@ class AppController extends Controller
         // Validate header
         // -----------------------------------------------------
 
-        $clientVersion = 0;
+        $clientVersion = 1;
 
         if ($clientVersionHeader !== '' && ctype_digit($clientVersionHeader)) {
             $clientVersion = (int) $clientVersionHeader;
