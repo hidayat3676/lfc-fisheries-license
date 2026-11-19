@@ -50,10 +50,10 @@
     <!-- Right Register Form Glass Card -->
     <div class="col-12 col-md-9 col-lg-6 max-w-500">
         <div class="card auth-glass-card border-0">
-            <div class="card-body p-4 p-sm-5">
-                <div class="text-center mb-4">
-                    <div class="d-inline-flex p-3 rounded-circle bg-success-subtle text-success mb-3 shadow-sm">
-                        <i class="bi bi-person-plus-fill fs-3 text-rflms"></i>
+            <div class="card-body p-4">
+                <div class="text-center mb-3">
+                    <div class="d-inline-flex p-2 rounded-circle bg-success-subtle text-success mb-2 shadow-sm">
+                        <i class="bi bi-person-plus-fill fs-4 text-rflms"></i>
                     </div>
                     <h2 class="h4 fw-bold mb-1 text-dark">Create Citizen Account</h2>
                     <p class="text-muted small mb-0">We will email a one-time code to verify your address.</p>

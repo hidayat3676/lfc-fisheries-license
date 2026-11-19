@@ -27,9 +27,16 @@ class ApplicationWorkflowService
     {
         if ($application) {
             $application->loadMissing('reservoir.district');
-            $districtName = (string) ($application->reservoir?->district?->name ?? 'KPK');
-            $cleanDistrict = preg_replace('/[^A-Za-z]/', '', $districtName);
-            $distPrefix = str_pad(strtoupper(substr($cleanDistrict ?: 'KPK', 0, 3)), 3, 'X');
+            $district = $application->reservoir?->district;
+            $districtCode = trim((string) ($district?->code ?? ''));
+
+            if (strlen($districtCode) === 3) {
+                $distPrefix = strtoupper($districtCode);
+            } else {
+                $districtName = (string) ($district?->name ?? 'KPK');
+                $cleanDistrict = preg_replace('/[^A-Za-z]/', '', $districtName);
+                $distPrefix = str_pad(strtoupper(substr($cleanDistrict ?: 'KPK', 0, 3)), 3, 'X');
+            }
 
             $monthYear = now()->format('my');
             $actorId = $application->applied_by ?: $application->user_id;

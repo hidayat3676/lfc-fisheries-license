@@ -12,6 +12,30 @@
     <link rel="shortcut icon" type="image/png" href="{{ asset('images/logo-2.png') }}">
     @include('partials.icons-cdn')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        html, body.aquatic-auth-bg {
+            overflow-x: hidden;
+            overflow-y: auto !important;
+        }
+        .aquatic-auth-bg nav,
+        .aquatic-auth-bg main {
+            position: relative;
+            z-index: 10 !important;
+        }
+        .tech-card-bg-canvas {
+            z-index: 1 !important;
+            opacity: 0.16 !important;
+        }
+        @media (min-width: 992px) {
+            html { font-size: 13.5px; }
+        }
+        @media (min-width: 1200px) {
+            .container, .container-lg, .container-md, .container-sm, .container-xl { max-width: 1140px; }
+        }
+        @media (min-width: 1400px) {
+            .container, .container-lg, .container-md, .container-sm, .container-xl, .container-xxl { max-width: 1220px; }
+        }
+    </style>
 </head>
 <body class="aquatic-auth-bg text-dark">
     <!-- Ambient Aquatic Rays & Particle Layers -->
@@ -108,7 +132,7 @@
     </nav>
 
     <!-- Main Content Shell -->
-    <main class="flex-grow-1 d-flex align-items-center justify-content-center py-4 py-lg-5 position-relative z-10">
+    <main class="flex-grow-1 d-flex align-items-center justify-content-center py-3 py-lg-4 position-relative z-10">
         <div class="container">
             @unless (request()->routeIs('register.verify', 'password.reset'))
                 @if (session('status'))

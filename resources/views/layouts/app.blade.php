@@ -13,6 +13,17 @@
     <link rel="shortcut icon" type="image/png" href="{{ asset('images/logo-2.png') }}">
     @include('partials.icons-cdn')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        @media (min-width: 992px) {
+            html { font-size: 14.5px; }
+        }
+        @media (min-width: 1200px) {
+            .container, .container-lg, .container-md, .container-sm, .container-xl { max-width: 1140px; }
+        }
+        @media (min-width: 1400px) {
+            .container, .container-lg, .container-md, .container-sm, .container-xl, .container-xxl { max-width: 1220px; }
+        }
+    </style>
     @stack('styles')
 </head>
 <body class="d-flex flex-column min-vh-100">

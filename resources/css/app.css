@@ -260,6 +260,12 @@ html {
     scroll-behavior: smooth;
 }
 
+@media (min-width: 992px) {
+    html {
+        font-size: 14.5px;
+    }
+}
+
 body {
     font-family: var(--rflms-font);
     color: var(--rflms-ink);
@@ -907,7 +913,8 @@ a.text-decoration-none .card-panel:hover,
     position: relative;
     min-height: 100vh;
     background: linear-gradient(135deg, #0b6e4f 0%, #064a35 60%, #032b1f 100%);
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
 }
@@ -944,9 +951,9 @@ a.text-decoration-none .card-panel:hover,
     top: 110px;
     left: 5%;
     perspective: 1200px;
-    z-index: 2;
+    z-index: 1;
     pointer-events: none;
-    opacity: 0.85;
+    opacity: 0.16;
 }
 
 .tech-bg-permit-card {
@@ -1895,7 +1902,17 @@ dl.row dd {
     font-weight: 500;
 }
 
-/* ── Expanded Responsive Layout Max-Widths ── */
+/* ── Responsive Layout Max-Widths ── */
+@media (min-width: 1200px) {
+    .container,
+    .container-lg,
+    .container-md,
+    .container-sm,
+    .container-xl {
+        max-width: 1140px;
+    }
+}
+
 @media (min-width: 1400px) {
     .container,
     .container-lg,
@@ -1903,17 +1920,6 @@ dl.row dd {
     .container-sm,
     .container-xl,
     .container-xxl {
-        max-width: 1440px;
-    }
-}
-
-@media (min-width: 1600px) {
-    .container,
-    .container-lg,
-    .container-md,
-    .container-sm,
-    .container-xl,
-    .container-xxl {
-        max-width: 1560px;
+        max-width: 1220px;
     }
 }

@@ -58,12 +58,11 @@
 
 {{-- Interactive PAYMIR API Console (1. Voucher Tracking & 2. Cancel Voucher) --}}
 <div class="row g-4 mb-4">
-    {{-- 1. Voucher Tracking API --}}
+    {{-- 1. Voucher Tracking --}}
     <div class="col-lg-6">
         <div class="content-shell h-100">
-            <div class="panel-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-search me-1"></i> 1. Voucher Tracking API</span>
-                <code class="small text-secondary">POST /api/Voucher/VoucherTrace</code>
+            <div class="panel-header">
+                <span><i class="bi bi-search me-1"></i> 1. Voucher Tracking</span>
             </div>
             <div class="p-3 p-lg-4">
                 <p class="small text-secondary mb-3">
@@ -159,12 +158,11 @@
         </div>
     </div>
 
-    {{-- 2. Cancel Voucher API --}}
+    {{-- 2. Cancel Voucher --}}
     <div class="col-lg-6">
         <div class="content-shell h-100">
-            <div class="panel-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-x-circle me-1"></i> 2. Cancel Voucher API</span>
-                <code class="small text-secondary">POST /api/Voucher/CancelVoucher</code>
+            <div class="panel-header">
+                <span><i class="bi bi-x-circle me-1"></i> 2. Cancel Voucher</span>
             </div>
             <div class="p-3 p-lg-4">
                 <p class="small text-secondary mb-3">

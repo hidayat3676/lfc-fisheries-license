@@ -56,6 +56,53 @@ class DistrictSeeder extends Seeder
     ];
 
     /**
+     * Official 3-character codes for Khyber Pakhtunkhwa districts.
+     *
+     * @var array<string, string>
+     */
+    public const DISTRICT_CODES = [
+        'Abbottabad' => 'ABT',
+        'Bajaur' => 'BJR',
+        'Bannu' => 'BNU',
+        'Battagram' => 'BTG',
+        'Buner' => 'BNR',
+        'Charsadda' => 'CHD',
+        'Chitral lower' => 'CTL',
+        'Chitral Upper' => 'CTU',
+        'Dera Ismail Khan' => 'DIK',
+        'Hangu' => 'HNG',
+        'Haripur' => 'HRP',
+        'Karak' => 'KRK',
+        'Khyber' => 'KHY',
+        'Kohat' => 'KHT',
+        'Kohistan Lower' => 'KHL',
+        'Kohistan Upper' => 'KHU',
+        'Kolai Palas' => 'KLP',
+        'Kurram' => 'KRM',
+        'Lakki Marwat' => 'LKM',
+        'Lower Dir' => 'DIR',
+        'Malakand' => 'MLK',
+        'Mansehra' => 'MNS',
+        'Mardan' => 'MRD',
+        'Mohmand' => 'MHM',
+        'North Waziristan' => 'NWA',
+        'Nowshera' => 'NSR',
+        'Orakzai' => 'ORZ',
+        'Peshawar' => 'PEW',
+        'Shangla' => 'SHG',
+        'South Waziristan Lower' => 'SWL',
+        'South Waziristan Upper' => 'SWU',
+        'Subdivision Dikhan/Darazinda' => 'DRZ',
+        'Subdivision Hassan khel' => 'HSK',
+        'Subdivision wazir bannu/lucky' => 'WZR',
+        'Swabi' => 'SWB',
+        'Swat' => 'SWT',
+        'Tank' => 'TNK',
+        'Torghar' => 'TGR',
+        'Upper Dir' => 'DRU',
+    ];
+
+    /**
      * Urdu names for Khyber Pakhtunkhwa districts.
      *
      * @var array<string, string>
@@ -102,13 +149,30 @@ class DistrictSeeder extends Seeder
         'Upper Dir' => 'اپر دیر',
     ];
 
+    public static function codeFor(string $name): string
+    {
+        if (isset(self::DISTRICT_CODES[$name])) {
+            return self::DISTRICT_CODES[$name];
+        }
+
+        foreach (self::DISTRICT_CODES as $districtName => $code) {
+            if (strcasecmp($districtName, trim($name)) === 0) {
+                return $code;
+            }
+        }
+
+        $clean = preg_replace('/[^A-Za-z]/', '', $name);
+
+        return str_pad(strtoupper(substr($clean ?: 'KPK', 0, 3)), 3, 'X');
+    }
+
     public function run(): void
     {
         $hasUrduColumn = Schema::hasColumn('districts', 'urdu_name');
 
         foreach (self::DISTRICTS as $name) {
             $attributes = [
-                'code' => strtoupper(str_replace(['.', ' ', '-', '/'], '', $name)),
+                'code' => self::codeFor($name),
                 'is_active' => true,
             ];
 

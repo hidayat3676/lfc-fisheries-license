@@ -21,11 +21,14 @@
             <input type="text" name="name" class="form-control" required value="{{ old('name', $category->name) }}">
         </div>
         <div class="col-md-4">
-            <label class="form-label d-flex justify-content-between align-items-center">
+            <label class="form-label d-flex justify-content-between align-items-center" for="urdu_name">
                 <span>Urdu Name</span>
                 <span dir="rtl" lang="ur" class="text-secondary small">اردو نام</span>
             </label>
-            <input type="text" name="urdu_name" dir="rtl" lang="ur" class="form-control" placeholder="مثلاً یومیہ لائسنس" value="{{ old('urdu_name', $category->urdu_name) }}">
+            <input type="text" id="urdu_name" name="urdu_name" dir="rtl" lang="ur" class="form-control" placeholder="مثلاً یومیہ لائسنس" value="{{ old('urdu_name', $category->urdu_name) }}" autocomplete="off">
+            <div id="urduKeyboardHint" class="form-text small text-success d-none">
+                <i class="bi bi-keyboard me-1"></i> Urdu phonetic typing active (اردو کی بورڈ فعال ہے)
+            </div>
         </div>
         <div class="col-12">
             <label class="form-label">Description</label>
@@ -84,4 +87,71 @@
     </div>
     <button class="btn btn-rflms mt-3" type="submit">Save</button>
 </form>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const urduInput = document.getElementById('urdu_name');
+    const hint = document.getElementById('urduKeyboardHint');
+    if (!urduInput) return;
+
+    // Standard Urdu Phonetic Keyboard Mapping
+    const urduKeyMap = {
+        'a': '\u0627', 'A': '\u0622',
+        'b': '\u0628', 'B': '\u0613',
+        'c': '\u0686', 'C': '\u062B',
+        'd': '\u062F', 'D': '\u0688',
+        'e': '\u0639', 'E': '\u0611',
+        'f': '\u0641', 'F': '\u0656',
+        'g': '\u06AF', 'G': '\u063A',
+        'h': '\u06C1', 'H': '\u062D',
+        'i': '\u06CC', 'I': '\u0670',
+        'j': '\u062C', 'J': '\u0636',
+        'k': '\u06A9', 'K': '\u062E',
+        'l': '\u0644', 'L': '\u0612',
+        'm': '\u0645', 'M': '\u0652',
+        'n': '\u0646', 'N': '\u06BA',
+        'o': '\u06C1', 'O': '\u0629',
+        'p': '\u067E', 'P': '\u064F',
+        'q': '\u0642', 'Q': '\u0640',
+        'r': '\u0631', 'R': '\u0691',
+        's': '\u0633', 'S': '\u0635',
+        't': '\u062A', 'T': '\u0679',
+        'u': '\u0621', 'U': '\u0626',
+        'v': '\u0637', 'V': '\u0638',
+        'w': '\u0648', 'W': '\u0624',
+        'x': '\u0634', 'X': '\u0698',
+        'y': '\u06D2', 'Y': '\u0601',
+        'z': '\u0632', 'Z': '\u0630',
+        ',': '\u060C',
+        '.': '\u06D4',
+        '?': '\u061F',
+        ';': '\u061B'
+    };
+
+    urduInput.addEventListener('focus', function () {
+        if (hint) hint.classList.remove('d-none');
+    });
+
+    urduInput.addEventListener('blur', function () {
+        if (hint) hint.classList.add('d-none');
+    });
+
+    urduInput.addEventListener('keydown', function (e) {
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+        if (e.key.length !== 1) return;
+
+        const mapped = urduKeyMap[e.key];
+        if (!mapped) return;
+
+        e.preventDefault();
+        const start = this.selectionStart ?? this.value.length;
+        const end = this.selectionEnd ?? this.value.length;
+        this.value = this.value.slice(0, start) + mapped + this.value.slice(end);
+        const cursor = start + mapped.length;
+        this.setSelectionRange(cursor, cursor);
+    });
+});
+</script>
+@endpush
 @endsection

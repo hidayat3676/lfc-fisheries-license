@@ -168,11 +168,17 @@ class WaterBodyExcelSeeder extends Seeder
             ->first();
 
         if (! $district) {
-            $district = District::query()->create([
+            $attributes = [
                 'name' => $canonicalName,
-                'code' => strtoupper(str_replace(['.', ' ', '-', '/', '(', ')'], '', $canonicalName)),
+                'code' => DistrictSeeder::codeFor($canonicalName),
                 'is_active' => true,
-            ]);
+            ];
+
+            if (Schema::hasColumn('districts', 'urdu_name')) {
+                $attributes['urdu_name'] = DistrictSeeder::DISTRICT_URDU_NAMES[$canonicalName] ?? null;
+            }
+
+            $district = District::query()->create($attributes);
         }
 
         return $district;
