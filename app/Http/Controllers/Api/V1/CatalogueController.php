@@ -99,39 +99,12 @@ class CatalogueController extends Controller
                 ];
             })->values();
 
-        $closedSeasons = ClosedSeason::query()
-            ->active()
-            ->with(['reservoir:id,name,district_id', 'category:id,code,name'])
-            ->orderByRaw("CASE WHEN scope_type = 'global' THEN 1 WHEN scope_type = 'reservoir' THEN 2 ELSE 3 END")
-            ->orderBy('start_month')
-            ->orderBy('start_day')
-            ->get()
-            ->map(function (ClosedSeason $season) {
-                return [
-                    'id' => $season->id,
-                    'scope_type' => $season->scope_type,
-                    'scope_id' => $season->scope_id,
-                    'scope_label' => $season->scopeLabel(),
-                    'start_month' => $season->start_month,
-                    'start_day' => $season->start_day,
-                    'formatted_start' => $season->formattedStart(),
-                    'end_month' => $season->end_month,
-                    'end_day' => $season->end_day,
-                    'formatted_end' => $season->formattedEnd(),
-                    'formatted_period' => $season->formattedPeriod(),
-                    'duration_days' => $season->durationDays(),
-                    'reason' => $season->reason,
-                    'is_active' => $season->is_active,
-                    'is_currently_active' => $season->isCurrentlyActive(),
-                ];
-            })->values();
 
         return response()->json([
             'status' => 'success',
             'data' => [
                 'districts' => $districts,
                 'license_categories' => $categories,
-                'closed_seasons' => $closedSeasons,
                 'payment_methods' => [
                     ['key' => '1bill', 'label' => '1Bill / PAYMIR PSID'],
                     ['key' => 'cash', 'label' => 'Cash'],
