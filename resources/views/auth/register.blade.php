@@ -56,7 +56,7 @@
                         <i class="bi bi-person-plus-fill fs-4 text-rflms"></i>
                     </div>
                     <h2 class="h4 fw-bold mb-1 text-dark">Create Citizen Account</h2>
-                    <p class="text-muted small mb-0">We will email a one-time code to verify your address.</p>
+                    <p class="text-muted small mb-0">Register with your CNIC and password. Email &amp; OTP are optional.</p>
                 </div>
 
                 <form method="POST" action="{{ route('register.otp') }}" enctype="multipart/form-data">
@@ -64,7 +64,7 @@
                     <!-- Full Name -->
                     <div class="mb-3">
                         <label class="form-label text-dark fw-semibold small d-flex justify-content-between align-items-center" for="name">
-                            <span>Full Name</span>
+                            <span>Full Name <span class="text-danger">*</span></span>
                             <span dir="rtl" lang="ur" class="text-secondary">پورا نام</span>
                         </label>
                         <div class="input-group input-aquatic-group">
@@ -74,31 +74,56 @@
                         @error('name') <div class="invalid-feedback d-block small mt-1">{{ $message }}</div> @enderror
                     </div>
 
-                    <!-- Email Address -->
-                    <div class="mb-3">
-                        <label class="form-label text-dark fw-semibold small d-flex justify-content-between align-items-center" for="email">
-                            <span>Email Address</span>
-                            <span dir="rtl" lang="ur" class="text-secondary">ای میل ایڈریس</span>
-                        </label>
-                        <div class="input-group input-aquatic-group">
-                            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                            <input id="email" type="email" name="email" value="{{ old('email') }}" class="form-control @error('email') is-invalid @enderror" placeholder="name@example.com" required>
-                        </div>
-                        @error('email') <div class="invalid-feedback d-block small mt-1">{{ $message }}</div> @enderror
-                    </div>
-
                     <!-- CNIC Number -->
                     <div class="mb-3">
                         <label class="form-label text-dark fw-semibold small d-flex justify-content-between align-items-center" for="cnic">
-                            <span>CNIC Number</span>
+                            <span>CNIC Number <span class="text-danger">*</span></span>
                             <span dir="rtl" lang="ur" class="text-secondary">شناختی کارڈ نمبر</span>
                         </label>
                         <div class="input-group input-aquatic-group">
                             <span class="input-group-text"><i class="bi bi-card-heading"></i></span>
                             <input id="cnic" type="text" name="cnic" value="{{ old('cnic') }}" class="form-control @error('cnic') is-invalid @enderror" placeholder="12345-1234567-1" required maxlength="15" autocomplete="off" inputmode="numeric">
                         </div>
-                        <div class="form-text small text-secondary mt-1">Format: 12345-1234567-1</div>
+                        <div class="form-text small text-secondary mt-1">Format: 12345-1234567-1 (used for login)</div>
                         @error('cnic') <div class="invalid-feedback d-block small mt-1">{{ $message }}</div> @enderror
+                    </div>
+
+                    <!-- Email Address (Optional) -->
+                    <div class="mb-3">
+                        <label class="form-label text-dark fw-semibold small d-flex justify-content-between align-items-center" for="email">
+                            <span>Email Address <span class="text-muted fw-normal">(Optional)</span></span>
+                            <span dir="rtl" lang="ur" class="text-secondary">ای میل ایڈریس (اختیاری)</span>
+                        </label>
+                        <div class="input-group input-aquatic-group">
+                            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                            <input id="email" type="email" name="email" value="{{ old('email') }}" class="form-control @error('email') is-invalid @enderror" placeholder="name@example.com (optional)">
+                        </div>
+                        @error('email') <div class="invalid-feedback d-block small mt-1">{{ $message }}</div> @enderror
+                    </div>
+
+                    <!-- Password -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-sm-6">
+                            <label class="form-label text-dark fw-semibold small d-flex justify-content-between align-items-center" for="password">
+                                <span>Password <span class="text-danger">*</span></span>
+                                <span dir="rtl" lang="ur" class="text-secondary">پاس ورڈ</span>
+                            </label>
+                            <div class="input-group input-aquatic-group">
+                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                <input id="password" type="password" name="password" class="form-control @error('password') is-invalid @enderror" placeholder="Min 8 chars" required minlength="8">
+                            </div>
+                            @error('password') <div class="invalid-feedback d-block small mt-1">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label text-dark fw-semibold small d-flex justify-content-between align-items-center" for="password_confirmation">
+                                <span>Confirm Password <span class="text-danger">*</span></span>
+                                <span dir="rtl" lang="ur" class="text-secondary">تصدیق</span>
+                            </label>
+                            <div class="input-group input-aquatic-group">
+                                <span class="input-group-text"><i class="bi bi-shield-check"></i></span>
+                                <input id="password_confirmation" type="password" name="password_confirmation" class="form-control" placeholder="Repeat password" required minlength="8">
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Profile Picture (For Digital Licence Card) -->
@@ -117,7 +142,7 @@
 
                     <!-- Submit Button -->
                     <button class="btn btn-aquatic-submit w-100" type="submit">
-                        <i class="bi bi-send-check me-1"></i> Send Verification Code <span dir="rtl" lang="ur" class="ms-1">(تصدیقی کوڈ بھیجیں)</span>
+                        <i class="bi bi-person-check-fill me-1"></i> Create Account <span dir="rtl" lang="ur" class="ms-1">(اکاؤنٹ بنائیں)</span>
                     </button>
                 </form>
 

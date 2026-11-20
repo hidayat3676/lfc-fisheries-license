@@ -8,10 +8,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LicenseCategory extends Model
 {
+    public const TYPE_TROUT = 'trout';
+
+    public const TYPE_NON_TROUT = 'non_trout';
+
     protected $fillable = [
         'code',
         'name',
         'urdu_name',
+        'type',
         'description',
         'duration_type',
         'duration_days',
@@ -48,5 +53,21 @@ class LicenseCategory extends Model
     public function feeLabel(): string
     {
         return number_format((float) $this->fee_amount, 0).' '.$this->currency;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function types(): array
+    {
+        return [
+            self::TYPE_TROUT => 'Trout',
+            self::TYPE_NON_TROUT => 'Non-Trout',
+        ];
+    }
+
+    public function typeLabel(): string
+    {
+        return self::types()[$this->type] ?? 'Non-Trout';
     }
 }

@@ -132,17 +132,21 @@ class ApplicationController extends Controller
             'accept_terms' => ['accepted'],
         ]);
 
-        if (! empty($data['district_id']) && (! $reservoir || (int) $reservoir->district_id !== (int) $data['district_id'])) {
+        $category = LicenseCategory::query()->findOrFail($data['category_id']);
+        $categoryType = $category->type ?: LicenseCategory::TYPE_NON_TROUT;
+
+        if (! empty($data['district_id']) && (! $reservoir || (int) $reservoir->district_id !== (int) $data['district_id'] || $reservoir->trout_type !== $categoryType)) {
             $reservoir = Reservoir::query()
                 ->where('district_id', (int) $data['district_id'])
                 ->where('is_active', true)
+                ->where('trout_type', $categoryType)
                 ->orderByDesc('is_open_for_licensing')
                 ->orderBy('name')
                 ->first();
 
             if (! $reservoir) {
                 throw ValidationException::withMessages([
-                    'district_id' => 'No active water bodies are available in the selected district.',
+                    'district_id' => 'No active '.strtolower($category->typeLabel()).' water bodies are available in the selected district.',
                 ]);
             }
         }
@@ -163,7 +167,6 @@ class ApplicationController extends Controller
             $data['payment_method'] = Application::PAYMENT_METHOD_COUNTER_CASH;
         }
 
-        $category = LicenseCategory::query()->findOrFail($data['category_id']);
         $isSeasonal = $category->duration_type === 'seasonal'
             || in_array($category->expiry_rule, ['fixed_date', 'season_end'], true);
 

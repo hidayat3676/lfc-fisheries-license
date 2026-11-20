@@ -26,17 +26,45 @@
     </div>
 @endif
 
-<form method="POST" action="{{ route('admin.applications.store') }}" enctype="multipart/form-data">
+@php
+    $step1ErrorKeys = [
+        'citizen_type', 'user_id', 'full_name', 'cnic', 'father_name',
+        'mobile', 'email', 'password', 'dob', 'gender',
+        'residence_district_id', 'province', 'emergency_contact', 'address', 'photo',
+    ];
+    $step2ErrorKeys = [
+        'district_id', 'reservoir_id', 'category_id', 'fishing_start_date',
+        'payment_method', 'payment_reference', 'payment_receipt', 'officer_remarks',
+    ];
+    $hasStep1Errors = $errors->hasAny($step1ErrorKeys);
+    $hasStep2Errors = $errors->hasAny($step2ErrorKeys);
+    $initialStep = (! $hasStep1Errors && $hasStep2Errors) ? 2 : 1;
+@endphp
+
+<form method="POST" action="{{ route('admin.applications.store') }}" enctype="multipart/form-data" id="walkinApplicationForm">
     @csrf
 
-    <div class="row g-4">
-        <!-- Left Column: Citizen Selection / Registration -->
-        <div class="col-lg-7">
-            <div class="content-shell mb-4">
-                <div class="content-shell-header px-4 py-3 border-bottom">
-                    <h5 class="fw-bold mb-0"><i class="bi bi-person-badge me-2 text-rflms"></i>1. Citizen Information</h5>
-                </div>
-                <div class="content-shell-body p-4">
+    {{-- Step Progress Header --}}
+    <div class="bg-white rounded-4 shadow-sm border p-3 mb-4">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <button type="button" id="stepNav1" onclick="goToStep(1)" class="btn btn-sm {{ $initialStep === 1 ? 'btn-rflms' : 'btn-outline-secondary' }} rounded-pill px-3 fw-semibold">
+                <span class="badge bg-white text-dark rounded-circle me-1">1</span> Citizen Registration / Existing User
+            </button>
+            <div class="flex-grow-1 border-bottom d-none d-md-block mx-2"></div>
+            <button type="button" id="stepNav2" onclick="goToStep(2)" class="btn btn-sm {{ $initialStep === 2 ? 'btn-rflms' : 'btn-outline-secondary' }} rounded-pill px-3 fw-semibold">
+                <span class="badge bg-white text-dark rounded-circle me-1">2</span> District, Licence Category &amp; Payment
+            </button>
+        </div>
+    </div>
+
+    {{-- STEP 1: User Registration / Existing User Selection --}}
+    <div id="wizardStep1" class="{{ $initialStep === 1 ? '' : 'd-none' }}">
+        <div class="content-shell mb-4">
+            <div class="content-shell-header px-4 py-3 border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0"><i class="bi bi-person-badge me-2 text-rflms"></i>Step 1: Citizen Registration or Existing User</h5>
+                <span class="badge text-bg-light border text-secondary">Step 1 of 2</span>
+            </div>
+            <div class="content-shell-body p-4">
                     
                     <!-- Citizen Mode Selection -->
                     <div class="mb-4 p-3 bg-light rounded-3 border">
@@ -161,19 +189,31 @@
                         </div>
                     </div>
 
+                <div id="step1ValidationAlert" class="alert alert-warning small mt-3 d-none">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                    <span id="step1ValidationText">Please complete all required citizen fields before continuing to Step 2.</span>
+                </div>
+
+                <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+                    <button type="button" class="btn btn-rflms btn-lg px-4 fw-semibold" onclick="goToStep(2)">
+                        Next: District, Licence &amp; Payment <i class="bi bi-arrow-right ms-1"></i>
+                    </button>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Right Column: Permit & Payment Details -->
-        <div class="col-lg-5">
-            
-            <!-- Permit Selection Shell -->
-            <div class="content-shell mb-4">
-                <div class="content-shell-header px-4 py-3 border-bottom">
-                    <h5 class="fw-bold mb-0"><i class="bi bi-water me-2 text-rflms"></i>2. Licence Details</h5>
-                </div>
-                <div class="content-shell-body p-4">
+    {{-- STEP 2: District Selection, Licence Category & Payment Details --}}
+    <div id="wizardStep2" class="{{ $initialStep === 2 ? '' : 'd-none' }}">
+        <div class="row g-4">
+            <!-- Left: District, Water Bodies & Licence Category -->
+            <div class="col-lg-7">
+                <div class="content-shell mb-4 h-100">
+                    <div class="content-shell-header px-4 py-3 border-bottom d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-water me-2 text-rflms"></i>Step 2: District &amp; Licence Category</h5>
+                        <span class="badge text-bg-light border text-secondary">Step 2 of 2</span>
+                    </div>
+                    <div class="content-shell-body p-4">
                     <div class="mb-3">
                         <label class="form-label" for="district_id">District <span class="text-danger">*</span></label>
                         <select name="district_id" id="district_id" class="form-select @error('district_id') is-invalid @enderror" required onchange="renderDistrictWaterBodies()">
@@ -236,15 +276,17 @@
                             Seasonal licence starts from the current date and expires on the closed season end date defined for this licence (<span id="seasonalEndDateLabel">—</span>).
                         </div>
                     </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Payment & Counter Approval Shell -->
-            <div class="content-shell mb-4">
-                <div class="content-shell-header px-4 py-3 border-bottom">
-                    <h5 class="fw-bold mb-0"><i class="bi bi-cash-stack me-2 text-rflms"></i>3. Payment &amp; Counter Approval</h5>
-                </div>
-                <div class="content-shell-body p-4">
+            <!-- Right: Payment & Counter Approval -->
+            <div class="col-lg-5">
+                <div class="content-shell mb-4 h-100">
+                    <div class="content-shell-header px-4 py-3 border-bottom">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-cash-stack me-2 text-rflms"></i>Payment &amp; Counter Approval</h5>
+                    </div>
+                    <div class="content-shell-body p-4">
                     <div class="mb-3">
                         <label class="form-label" for="payment_method">Payment Collection Method <span class="text-danger">*</span></label>
                         <select name="payment_method" id="payment_method" class="form-select @error('payment_method') is-invalid @enderror" required>
@@ -281,12 +323,17 @@
                         <div class="form-text small mt-1 ms-4">Generates active licence permit and QR code immediately.</div>
                     </div>
 
-                    <button type="submit" class="btn btn-rflms btn-lg w-100 py-3 fw-bold">
-                        <i class="bi bi-check-circle-fill me-2"></i> Submit &amp; Process Walk-in Application
-                    </button>
+                    <div class="d-flex flex-wrap gap-2 justify-content-between">
+                        <button type="button" class="btn btn-outline-secondary btn-lg px-4" onclick="goToStep(1)">
+                            <i class="bi bi-arrow-left me-1"></i> Back
+                        </button>
+                        <button type="submit" class="btn btn-rflms btn-lg flex-grow-1 py-3 fw-bold">
+                            <i class="bi bi-check-circle-fill me-2"></i> Submit &amp; Process Walk-in Application
+                        </button>
+                    </div>
                 </div>
             </div>
-
+        </div>
         </div>
     </div>
 </form>
@@ -324,6 +371,8 @@
         return [
             $cat->id => [
                 'id' => $cat->id,
+                'type' => $cat->type ?: \App\Models\LicenseCategory::TYPE_NON_TROUT,
+                'type_label' => $cat->typeLabel(),
                 'duration_type' => $cat->duration_type,
                 'is_seasonal' => $isSeasonal,
                 'from_date' => $todayStr,
@@ -344,6 +393,71 @@
         const isExisting = document.getElementById('citizenExisting').checked;
         document.getElementById('existingCitizenBlock').style.display = isExisting ? 'block' : 'none';
         document.getElementById('newCitizenBlock').style.display = isExisting ? 'none' : 'block';
+        const alertBox = document.getElementById('step1ValidationAlert');
+        if (alertBox) alertBox.classList.add('d-none');
+    }
+
+    function validateStep1() {
+        const isExisting = document.getElementById('citizenExisting').checked;
+        const alertBox = document.getElementById('step1ValidationAlert');
+        const alertText = document.getElementById('step1ValidationText');
+
+        if (isExisting) {
+            const userEl = document.getElementById('user_id');
+            if (!userEl || !userEl.value) {
+                if (alertText) alertText.textContent = 'Please select an existing registered citizen to continue.';
+                if (alertBox) alertBox.classList.remove('d-none');
+                userEl?.focus();
+                return false;
+            }
+        } else {
+            const requiredIds = [
+                'full_name', 'cnic', 'father_name', 'mobile',
+                'dob', 'gender', 'residence_district_id', 'province',
+                'emergency_contact', 'address'
+            ];
+            for (const id of requiredIds) {
+                const el = document.getElementById(id);
+                if (el && !String(el.value || '').trim()) {
+                    if (alertText) alertText.textContent = 'Please complete all required citizen registration fields (*) before continuing.';
+                    if (alertBox) alertBox.classList.remove('d-none');
+                    el.focus();
+                    return false;
+                }
+            }
+        }
+
+        if (alertBox) alertBox.classList.add('d-none');
+        return true;
+    }
+
+    function goToStep(step) {
+        if (step === 2 && !validateStep1()) {
+            return;
+        }
+
+        const step1El = document.getElementById('wizardStep1');
+        const step2El = document.getElementById('wizardStep2');
+        const nav1 = document.getElementById('stepNav1');
+        const nav2 = document.getElementById('stepNav2');
+
+        if (step === 2) {
+            step1El?.classList.add('d-none');
+            step2El?.classList.remove('d-none');
+            nav1?.classList.remove('btn-rflms');
+            nav1?.classList.add('btn-outline-secondary');
+            nav2?.classList.remove('btn-outline-secondary');
+            nav2?.classList.add('btn-rflms');
+        } else {
+            step2El?.classList.add('d-none');
+            step1El?.classList.remove('d-none');
+            nav2?.classList.remove('btn-rflms');
+            nav2?.classList.add('btn-outline-secondary');
+            nav1?.classList.remove('btn-outline-secondary');
+            nav1?.classList.add('btn-rflms');
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function handleCategoryChange() {
@@ -375,6 +489,8 @@
             dailyBlock.classList.remove('d-none');
             seasonalBlock.classList.add('d-none');
         }
+
+        renderDistrictWaterBodies();
     }
 
     function renderDistrictWaterBodies() {
@@ -392,11 +508,20 @@
             return;
         }
 
-        const items = districtWaterBodies[districtId] || [];
+        const categoryId = document.getElementById('category_id')?.value;
+        const selectedCategoryMeta = categoryId ? categoriesMeta[categoryId] : null;
+        const selectedType = selectedCategoryMeta ? selectedCategoryMeta.type : null;
+
+        let items = districtWaterBodies[districtId] || [];
+        if (selectedType) {
+            items = items.filter(item => item.trout_type === selectedType);
+        }
+
         countBadge.textContent = items.length + ' available';
 
         if (items.length === 0) {
-            placeholder.innerHTML = '<i class="bi bi-exclamation-circle text-warning me-1"></i> No active water bodies found in this district.';
+            const typeWord = selectedCategoryMeta ? selectedCategoryMeta.type_label.toLowerCase() + ' ' : '';
+            placeholder.innerHTML = `<i class="bi bi-exclamation-circle text-warning me-1"></i> No active ${typeWord}water bodies found in this district.`;
             placeholder.classList.remove('d-none');
             listEl.classList.add('d-none');
             listEl.innerHTML = '';

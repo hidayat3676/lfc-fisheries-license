@@ -79,12 +79,26 @@
 
                 <form method="POST" action="{{ $portal === 'staff' ? route('staff.login.submit') : route('login.submit') }}">
                     @csrf
-                    <!-- Email Input -->
+                    <!-- CNIC or Email Input -->
                     <div class="mb-3">
-                        <label class="form-label text-dark fw-semibold small" for="email">Email Address</label>
+                        <label class="form-label text-dark fw-semibold small d-flex justify-content-between align-items-center" for="email">
+                            <span>{{ $portal === 'staff' ? 'Email Address' : 'CNIC or Email Address' }}</span>
+                            @if ($portal === 'citizen')
+                                <span dir="rtl" lang="ur" class="text-secondary">شناختی کارڈ نمبر یا ای میل</span>
+                            @endif
+                        </label>
                         <div class="input-group input-aquatic-group">
-                            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                            <input id="email" type="email" name="email" value="{{ old('email') }}" class="form-control @error('email') is-invalid @enderror" placeholder="name@example.com" required autofocus>
+                            <span class="input-group-text"><i class="bi {{ $portal === 'staff' ? 'bi-envelope' : 'bi-card-heading' }}"></i></span>
+                            <input
+                                id="email"
+                                type="{{ $portal === 'staff' ? 'email' : 'text' }}"
+                                name="email"
+                                value="{{ old('email') }}"
+                                class="form-control @error('email') is-invalid @enderror"
+                                placeholder="{{ $portal === 'staff' ? 'name@example.com' : '12345-1234567-1 or name@example.com' }}"
+                                required
+                                autofocus
+                            >
                         </div>
                         @error('email') <div class="invalid-feedback d-block small mt-1">{{ $message }}</div> @enderror
                     </div>

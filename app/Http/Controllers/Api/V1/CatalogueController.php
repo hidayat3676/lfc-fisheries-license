@@ -81,6 +81,8 @@ class CatalogueController extends Controller
                     'code' => $cat->code,
                     'name' => $cat->name,
                     'urdu_name' => $cat->urdu_name,
+                    'type' => $cat->type ?: LicenseCategory::TYPE_NON_TROUT,
+                    'type_label' => $cat->typeLabel(),
                     'description' => $cat->description,
                     'duration_type' => $cat->duration_type,
                     'duration_days' => $cat->duration_days,
@@ -167,7 +169,7 @@ class CatalogueController extends Controller
             ->active()
             ->orderBy('fee_amount')
             ->get([
-                'id', 'code', 'name', 'urdu_name', 'description', 'duration_type', 'duration_days',
+                'id', 'code', 'name', 'urdu_name', 'type', 'description', 'duration_type', 'duration_days',
                 'fee_amount', 'currency', 'expiry_rule', 'fixed_expiry_month_day',
                 'instructions', 'terms',
             ]);

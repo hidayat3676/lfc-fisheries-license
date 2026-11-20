@@ -12,15 +12,15 @@
     @csrf
     @if ($mode === 'edit') @method('PUT') @endif
     <div class="row g-3">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <label class="form-label">Code</label>
             <input type="text" name="code" class="form-control" required value="{{ old('code', $category->code) }}">
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <label class="form-label">Name (English)</label>
             <input type="text" name="name" class="form-control" required value="{{ old('name', $category->name) }}">
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <label class="form-label d-flex justify-content-between align-items-center" for="urdu_name">
                 <span>Urdu Name</span>
                 <span dir="rtl" lang="ur" class="text-secondary small">اردو نام</span>
@@ -29,6 +29,14 @@
             <div id="urduKeyboardHint" class="form-text small text-success d-none">
                 <i class="bi bi-keyboard me-1"></i> Urdu phonetic typing active (اردو کی بورڈ فعال ہے)
             </div>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label" for="type">Type</label>
+            <select name="type" id="type" class="form-select" required>
+                @foreach (\App\Models\LicenseCategory::types() as $typeKey => $typeLabel)
+                    <option value="{{ $typeKey }}" @selected(old('type', $category->type ?: \App\Models\LicenseCategory::TYPE_NON_TROUT) === $typeKey)>{{ $typeLabel }}</option>
+                @endforeach
+            </select>
         </div>
         <div class="col-12">
             <label class="form-label">Description</label>

@@ -22,24 +22,57 @@ class RegisterController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
-            'email' => ['required', 'email', 'max:190', 'unique:users,email'],
+            'email' => ['nullable', 'email', 'max:190', 'unique:users,email'],
             'cnic' => ['required', 'string', 'regex:/^\d{5}-\d{7}-\d$/', 'unique:citizen_profiles,cnic'],
             'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ], [
             'cnic.regex' => 'CNIC must be in format 12345-1234567-1.',
             'cnic.unique' => 'This CNIC is already registered.',
         ]);
+
+        $email = ! empty($data['email']) ? strtolower(trim($data['email'])) : null;
 
         $photoPath = null;
         if ($request->hasFile('photo')) {
             $photoPath = $request->file('photo')->store('profiles', 'public');
         }
 
-        $payload = $otpService->issue($data['email'], EmailOtp::PURPOSE_REGISTER);
+        // Direct registration (no OTP required when password is provided or email is omitted)
+        if (! empty($data['password']) || $email === null) {
+            if (empty($data['password'])) {
+                $request->validate([
+                    'password' => ['required', 'string', 'min:8', 'confirmed'],
+                ]);
+            }
+
+            $user = User::query()->create([
+                'name' => $data['name'],
+                'email' => $email,
+                'password' => $data['password'],
+                'user_type' => User::TYPE_CITIZEN,
+                'email_verified_at' => now(),
+                'is_active' => true,
+                'all_districts' => false,
+            ]);
+
+            $user->citizenProfile()->create([
+                'full_name' => $data['name'],
+                'cnic' => $data['cnic'],
+                'photo_path' => $photoPath,
+            ]);
+
+            Auth::login($user);
+            $request->session()->regenerate();
+
+            return redirect()->route('citizen.dashboard')->with('status', 'Account created successfully.');
+        }
+
+        $payload = $otpService->issue($email, EmailOtp::PURPOSE_REGISTER);
 
         $request->session()->put('register', [
             'name' => $data['name'],
-            'email' => strtolower($data['email']),
+            'email' => $email,
             'cnic' => $data['cnic'],
             'photo_path' => $photoPath,
             'expires_at' => $payload['expires_at'],
@@ -52,12 +85,12 @@ class RegisterController extends Controller
 
         return redirect()
             ->route('register.verify')
-            ->with('status', 'Verification code sent to your email.');
+            ->with('status', 'Verification code sent to your email (OTP is optional).');
     }
 
     public function showVerify(Request $request): View|RedirectResponse
     {
-        if (! $request->session()->has('register.email')) {
+        if (! $request->session()->has('register')) {
             return redirect()->route('register');
         }
 
@@ -77,15 +110,17 @@ class RegisterController extends Controller
         }
 
         $data = $request->validate([
-            'otp' => ['required', 'string', 'size:6'],
+            'otp' => ['nullable', 'string', 'size:6'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
-        $otpService->verify($session['email'], EmailOtp::PURPOSE_REGISTER, $data['otp']);
+        if (! empty($data['otp']) && ! empty($session['email'])) {
+            $otpService->verify($session['email'], EmailOtp::PURPOSE_REGISTER, $data['otp']);
+        }
 
         $user = User::query()->create([
             'name' => $session['name'],
-            'email' => $session['email'],
+            'email' => $session['email'] ?? null,
             'password' => $data['password'],
             'user_type' => User::TYPE_CITIZEN,
             'email_verified_at' => now(),
@@ -109,7 +144,7 @@ class RegisterController extends Controller
     public function resend(Request $request, OtpService $otpService): RedirectResponse
     {
         $session = $request->session()->get('register');
-        if (! $session) {
+        if (! $session || empty($session['email'])) {
             return redirect()->route('register');
         }
 

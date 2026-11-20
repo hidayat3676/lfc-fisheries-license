@@ -261,6 +261,8 @@
         return [
             $cat->id => [
                 'id' => $cat->id,
+                'type' => $cat->type ?: \App\Models\LicenseCategory::TYPE_NON_TROUT,
+                'type_label' => $cat->typeLabel(),
                 'duration_type' => $cat->duration_type,
                 'is_seasonal' => $isSeasonal,
                 'from_date' => $todayStr,
@@ -306,6 +308,8 @@
             dailyBlock.classList.remove('d-none');
             seasonalBlock.classList.add('d-none');
         }
+
+        renderDistrictWaterBodies();
     }
 
     function renderDistrictWaterBodies() {
@@ -333,11 +337,20 @@
             termsLabel.textContent = 'District ' + districtName;
         }
 
-        const items = districtWaterBodies[districtId] || [];
+        const categoryId = document.getElementById('category_id')?.value;
+        const selectedCategoryMeta = categoryId ? categoriesMeta[categoryId] : null;
+        const selectedType = selectedCategoryMeta ? selectedCategoryMeta.type : null;
+
+        let items = districtWaterBodies[districtId] || [];
+        if (selectedType) {
+            items = items.filter(item => item.trout_type === selectedType);
+        }
+
         countBadge.textContent = items.length + ' available';
 
         if (items.length === 0) {
-            placeholder.innerHTML = '<i class="bi bi-exclamation-circle text-warning me-1"></i> No active water bodies found in this district.';
+            const typeWord = selectedCategoryMeta ? selectedCategoryMeta.type_label.toLowerCase() + ' ' : '';
+            placeholder.innerHTML = `<i class="bi bi-exclamation-circle text-warning me-1"></i> No active ${typeWord}water bodies found in this district.`;
             placeholder.classList.remove('d-none');
             listEl.classList.add('d-none');
             listEl.innerHTML = '';

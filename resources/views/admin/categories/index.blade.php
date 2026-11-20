@@ -43,6 +43,7 @@
                     <th>Code</th>
                     <th>Name</th>
                     <th>Urdu Name</th>
+                    <th>Type</th>
                     <th>Fee</th>
                     <th>Duration</th>
                     <th>Expiry rule</th>
@@ -56,6 +57,11 @@
                         <td class="fw-semibold">{{ $category->code }}</td>
                         <td>{{ $category->name }}</td>
                         <td dir="rtl" lang="ur">{{ $category->urdu_name ?: '—' }}</td>
+                        <td>
+                            <span class="badge {{ $category->type === \App\Models\LicenseCategory::TYPE_TROUT ? 'text-bg-info text-dark' : 'text-bg-secondary' }}">
+                                {{ $category->typeLabel() }}
+                            </span>
+                        </td>
                         <td>{{ $category->feeLabel() }}</td>
                         <td class="small">{{ $category->duration_type }}@if($category->duration_days) ({{ $category->duration_days }}d)@endif</td>
                         <td class="small">{{ $category->expiry_rule }}@if($category->fixed_expiry_month_day) / {{ $category->fixed_expiry_month_day }}@endif</td>

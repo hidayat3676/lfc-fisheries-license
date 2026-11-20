@@ -132,6 +132,9 @@ class ApplicationController extends Controller
             'cnic.regex' => 'CNIC must be in format 12345-1234567-1.',
         ]);
 
+        $category = LicenseCategory::query()->findOrFail($data['category_id']);
+        $categoryType = $category->type ?: LicenseCategory::TYPE_NON_TROUT;
+
         if (! empty($data['reservoir_id'])) {
             $reservoir = Reservoir::query()->where('is_active', true)->findOrFail($data['reservoir_id']);
             $this->assertScopedDistrict($request, (int) $reservoir->district_id);
@@ -142,17 +145,17 @@ class ApplicationController extends Controller
             $reservoir = Reservoir::query()
                 ->where('district_id', $districtId)
                 ->where('is_active', true)
+                ->where('trout_type', $categoryType)
                 ->orderBy('name')
                 ->first();
 
             if (! $reservoir) {
                 throw ValidationException::withMessages([
-                    'district_id' => 'No active water bodies are available in the selected district.',
+                    'district_id' => 'No active '.strtolower($category->typeLabel()).' water bodies are available in the selected district.',
                 ]);
             }
         }
 
-        $category = LicenseCategory::query()->findOrFail($data['category_id']);
         $isSeasonal = $category->duration_type === 'seasonal'
             || in_array($category->expiry_rule, ['fixed_date', 'season_end'], true);
 

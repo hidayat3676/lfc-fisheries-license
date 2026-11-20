@@ -92,12 +92,32 @@ class LoginController extends Controller
     private function attemptLogin(Request $request, array $allowedTypes, string $redirectRoute): RedirectResponse
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
+            'email' => ['nullable', 'string'],
+            'cnic' => ['nullable', 'string'],
+            'login' => ['nullable', 'string'],
             'password' => ['required', 'string'],
         ]);
 
-        $email = strtolower($credentials['email']);
-        $user = User::query()->where('email', $email)->first();
+        $identifier = trim((string) ($credentials['login'] ?? $credentials['cnic'] ?? $credentials['email'] ?? ''));
+        if ($identifier === '') {
+            throw ValidationException::withMessages([
+                'email' => 'Please enter your CNIC or email address.',
+            ]);
+        }
+
+        if (str_contains($identifier, '@')) {
+            $user = User::query()->where('email', strtolower($identifier))->first();
+        } else {
+            $digits = preg_replace('/\D/', '', $identifier);
+            $user = User::query()
+                ->whereHas('citizenProfile', function ($q) use ($identifier, $digits) {
+                    $q->where('cnic', $identifier);
+                    if ($digits !== '') {
+                        $q->orWhereRaw("REPLACE(cnic, '-', '') = ?", [$digits]);
+                    }
+                })
+                ->first();
+        }
 
         if (! $user || ! \Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password)) {
             throw ValidationException::withMessages([

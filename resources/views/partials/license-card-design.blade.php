@@ -44,7 +44,7 @@
     }
 
     .kpf-card-header {
-        background: linear-gradient(135deg, #075936 0%, #0b6e45 100%);
+        background: linear-gradient(135deg, #0c4a6e 0%, #0369a1 100%);
         color: #ffffff;
         padding: 14px 22px;
         border-bottom: 3.5px solid #d4a017;
@@ -92,7 +92,7 @@
     }
 
     .kpf-valid-pill {
-        background: #16a34a;
+        background: #0284c7;
         color: #ffffff;
         font-weight: 800;
         font-size: 0.82rem;
@@ -171,13 +171,13 @@
     .kpf-issued-top {
         font-size: 0.78rem;
         font-weight: 700;
-        color: #0b6e45;
+        color: #0369a1;
     }
 
     .kpf-holder-name {
         font-size: 1.18rem;
         font-weight: 800;
-        color: #0b6e45;
+        color: #0c4a6e;
         text-transform: uppercase;
         line-height: 1.2;
     }
@@ -264,7 +264,7 @@
 
     .kpf-back-strip {
         height: 34px;
-        background: linear-gradient(135deg, #075936 0%, #0b6e45 100%);
+        background: linear-gradient(135deg, #0c4a6e 0%, #0369a1 100%);
         border-bottom: 3.5px solid #d4a017;
     }
 
@@ -303,11 +303,11 @@
         width: 7px;
         height: 7px;
         border-radius: 50%;
-        background: #0b6e45;
+        background: #0369a1;
     }
 
     .kpf-signed-pill {
-        background: #075936;
+        background: #0c4a6e;
         color: #ffffff;
         font-weight: 800;
         font-size: 0.72rem;
@@ -443,7 +443,7 @@
                 </div>
                 <div>
                     <span class="kpf-label me-1">FISHING END:</span>
-                    <span class="kpf-value" style="color: #0b6e45;">{{ $endDateStr }}</span>
+                    <span class="kpf-value" style="color: #0369a1;">{{ $endDateStr }}</span>
                 </div>
             </div>
         </div>
@@ -480,7 +480,7 @@
                         <img src="{{ asset('images/logo-2.png') }}" alt="KP Crest">
                     </div>
                     <div>
-                        <div class="fw-bold small text-uppercase" style="color: #0b6e45; letter-spacing: 0.03em;">
+                        <div class="fw-bold small text-uppercase" style="color: #0369a1; letter-spacing: 0.03em;">
                             DIRECTORATE GENERAL OF FISHERIES
                         </div>
                         <div class="text-secondary" style="font-size: 0.76rem;">Government of Khyber Pakhtunkhwa, Peshawar</div>
@@ -489,7 +489,7 @@
                 </div>
 
                 <div class="text-end">
-                    <div class="fw-bold mb-1" style="font-size: 0.74rem; color: #0b6e45; letter-spacing: 0.04em;">
+                    <div class="fw-bold mb-1" style="font-size: 0.74rem; color: #0369a1; letter-spacing: 0.04em;">
                         ISSUED: {{ $issueDateStr }}
                     </div>
                     <div class="text-secondary border-top border-secondary pt-1 mb-2" style="font-size: 0.68rem; letter-spacing: 0.06em;">

@@ -23,18 +23,7 @@ class LicensingSeeder extends Seeder
                 'instructions' => 'Carry CNIC and digital/printed licence while fishing.',
                 'terms' => 'Follow local fishing rules and bag limits.',
             ],
-            [
-                'code' => 'MONTHLY',
-                'name' => 'Monthly Licence',
-                'description' => 'Valid for 30 days from start date.',
-                'duration_type' => 'monthly',
-                'duration_days' => 30,
-                'fee_amount' => 3000,
-                'expiry_rule' => 'from_start',
-                'fixed_expiry_month_day' => null,
-                'instructions' => 'Valid for the selected water body only.',
-                'terms' => 'Non-transferable. Subject to closed-season rules.',
-            ],
+      
             [
                 'code' => 'SEASONAL',
                 'name' => 'Seasonal Licence',

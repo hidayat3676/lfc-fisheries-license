@@ -209,12 +209,16 @@ class OfficerController extends Controller
             ? Application::PAYMENT_METHOD_COUNTER_CASH
             : $data['payment_method'];
 
+        $category = LicenseCategory::query()->findOrFail($data['category_id']);
+        $categoryType = $category->type ?: LicenseCategory::TYPE_NON_TROUT;
+
         if (! empty($data['reservoir_id'])) {
             $reservoir = Reservoir::query()->where('is_active', true)->findOrFail($data['reservoir_id']);
         } else {
             $reservoir = Reservoir::query()
                 ->where('district_id', (int) $data['district_id'])
                 ->where('is_active', true)
+                ->where('trout_type', $categoryType)
                 ->orderByDesc('is_open_for_licensing')
                 ->orderBy('name')
                 ->first();
@@ -222,7 +226,7 @@ class OfficerController extends Controller
             if (! $reservoir) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'No active water bodies are available in the selected district.',
+                    'message' => 'No active '.strtolower($category->typeLabel()).' water bodies are available in the selected district.',
                     'code' => 'NO_RESERVOIRS_IN_DISTRICT',
                 ], 422);
             }
@@ -252,7 +256,6 @@ class OfficerController extends Controller
             ], 422);
         }
 
-        $category = LicenseCategory::query()->findOrFail($data['category_id']);
         $isSeasonal = $category->duration_type === 'seasonal'
             || in_array($category->expiry_rule, ['fixed_date', 'season_end'], true);
 

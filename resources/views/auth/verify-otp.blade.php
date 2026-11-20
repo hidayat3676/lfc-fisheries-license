@@ -66,12 +66,12 @@
                     <!-- 6-digit OTP -->
                     <div class="mb-3">
                         <label class="form-label text-dark fw-semibold small d-flex justify-content-between align-items-center" for="otp">
-                            <span>6-Digit Verification Code</span>
-                            <span dir="rtl" lang="ur" class="text-secondary">6 ہندسوں کا تصدیقی کوڈ</span>
+                            <span>6-Digit Verification Code <span class="text-muted fw-normal">(Optional)</span></span>
+                            <span dir="rtl" lang="ur" class="text-secondary">6 ہندسوں کا تصدیقی کوڈ (اختیاری)</span>
                         </label>
                         <div class="input-group input-aquatic-group">
                             <span class="input-group-text"><i class="bi bi-key"></i></span>
-                            <input id="otp" type="text" name="otp" inputmode="numeric" maxlength="6" class="form-control text-center fw-bold fs-5 @error('otp') is-invalid @enderror" placeholder="••••••" required autofocus style="letter-spacing:.3em">
+                            <input id="otp" type="text" name="otp" inputmode="numeric" maxlength="6" class="form-control text-center fw-bold fs-5 @error('otp') is-invalid @enderror" placeholder="••••••" autofocus style="letter-spacing:.3em">
                         </div>
                         @error('otp') <div class="invalid-feedback d-block small mt-1">{{ $message }}</div> @enderror
                     </div>
