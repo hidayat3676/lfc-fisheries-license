@@ -88,8 +88,8 @@ class CitizenProfile extends Model
             && filled($this->gender)
             && filled($this->address)
             && filled($this->residence_district_id)
-            && filled($this->province)
-            && filled($this->emergency_contact);
+            && filled($this->province);
+            // && filled($this->emergency_contact);
     }
 
     /**

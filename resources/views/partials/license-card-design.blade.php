@@ -443,18 +443,22 @@
                     <span class="kpf-label me-1">FISHING START:</span>
                     <span class="kpf-value">{{ $startDateStr }}</span>
                 </div>
-                @if ($isDaily)
-                    <div>
-                        <span class="badge rounded-pill text-bg-light border fw-bold" style="color: #0369a1 !important; font-size: 0.74rem; letter-spacing: 0.03em;">
-                            <i class="bi bi-sun me-1"></i>From Dawn to Dusk
-                        </span>
-                    </div>
-                @endif
                 <div>
                     <span class="kpf-label me-1">FISHING END:</span>
                     <span class="kpf-value" style="color: #0369a1;">{{ $endDateStr }}</span>
                 </div>
             </div>
+
+            @if ($isDaily)
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-2">
+                    <span class="badge rounded-pill text-bg-light border fw-bold" style="color: #0369a1 !important; font-size: 0.72rem; letter-spacing: 0.02em;">
+                        <i class="bi bi-sunrise me-1"></i>Dawn • <span dir="rtl" lang="ur">طلوعِ آفتاب</span>
+                    </span>
+                    <span class="badge rounded-pill text-bg-light border fw-bold" style="color: #0369a1 !important; font-size: 0.72rem; letter-spacing: 0.02em;">
+                        <i class="bi bi-sunset me-1"></i>Dusk • <span dir="rtl" lang="ur">غروبِ آفتاب</span>
+                    </span>
+                </div>
+            @endif
         </div>
     </div>
 
@@ -480,7 +484,7 @@
                 <li>This digital permit is strictly non-transferable and valid only for the named licensee and designated district.</li>
                 <li>Fishing allowed with Rod &amp; Line only. Netting, dynamite, poisons, and electric currents are severe illegal offences.</li>
                 <li>Licensee must produce this card or PDF on demand to Fisheries Wardens &amp; Officers.</li>
-                <li>Strictly adhere to fisheries rules and site regulations.</li>
+                <li>Strictly adhere to species bag limits as per fisheries rules and minimum size regulations.</li>
             </ul>
 
             <div class="pt-3 border-top d-flex justify-content-between align-items-end flex-wrap gap-3">
