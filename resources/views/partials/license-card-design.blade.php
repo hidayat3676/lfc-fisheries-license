@@ -6,6 +6,8 @@
     $waterBodyName = $license->reservoir?->name ?: 'Designated Water Body';
     $districtName = $license->reservoir?->district?->name ?: 'KP';
     $categoryName = $license->category?->name ?: 'Angling Licence';
+    $isDaily = ($license->category?->duration_type === 'daily')
+        || ((int) ($license->category?->duration_days ?? 0) === 1);
     $issueDateStr = $license->issue_date?->format('d M Y') ?: now()->format('d M Y');
     $startDateStr = ($license->fishing_start_date ?? $license->application?->fishing_start_date ?? $license->issue_date)?->format('d M Y') ?: $issueDateStr;
     $endDateStr = ($license->expiry_date ?? $license->application?->fishing_end_date)?->format('d M Y') ?: '—';
@@ -441,6 +443,13 @@
                     <span class="kpf-label me-1">FISHING START:</span>
                     <span class="kpf-value">{{ $startDateStr }}</span>
                 </div>
+                @if ($isDaily)
+                    <div>
+                        <span class="badge rounded-pill text-bg-light border fw-bold" style="color: #0369a1 !important; font-size: 0.74rem; letter-spacing: 0.03em;">
+                            <i class="bi bi-sun me-1"></i>From Dawn to Dusk
+                        </span>
+                    </div>
+                @endif
                 <div>
                     <span class="kpf-label me-1">FISHING END:</span>
                     <span class="kpf-value" style="color: #0369a1;">{{ $endDateStr }}</span>
@@ -471,7 +480,7 @@
                 <li>This digital permit is strictly non-transferable and valid only for the named licensee and designated district.</li>
                 <li>Fishing allowed with Rod &amp; Line only. Netting, dynamite, poisons, and electric currents are severe illegal offences.</li>
                 <li>Licensee must produce this card or PDF on demand to Fisheries Wardens &amp; Officers.</li>
-                <li>Strictly adhere to species bag limits and minimum size regulations for District {{ $districtName }}.</li>
+                <li>Strictly adhere to fisheries rules and site regulations.</li>
             </ul>
 
             <div class="pt-3 border-top d-flex justify-content-between align-items-end flex-wrap gap-3">

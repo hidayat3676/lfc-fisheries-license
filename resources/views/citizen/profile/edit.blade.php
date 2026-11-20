@@ -54,7 +54,7 @@
                        value="{{ old('father_name', $profile?->father_name) }}">
                 @error('father_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <label class="form-label d-flex justify-content-between align-items-center">
                     <span>CNIC</span>
                     <span dir="rtl" lang="ur" class="text-secondary">شناختی کارڈ نمبر</span>
@@ -63,7 +63,7 @@
                        placeholder="12345-1234567-1" value="{{ old('cnic', $profile?->cnic) }}">
                 @error('cnic') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <label class="form-label d-flex justify-content-between align-items-center">
                     <span>Mobile</span>
                     <span dir="rtl" lang="ur" class="text-secondary">موبائل نمبر</span>
@@ -71,6 +71,15 @@
                 <input type="text" name="mobile" class="form-control @error('mobile') is-invalid @enderror" required
                        value="{{ old('mobile', $user->mobile) }}">
                 @error('mobile') <div class="invalid-feedback">{{ $message }}</div> @enderror
+            </div>
+            <div class="col-md-4">
+                <label class="form-label d-flex justify-content-between align-items-center">
+                    <span>Email <span class="text-muted fw-normal">(Optional)</span></span>
+                    <span dir="rtl" lang="ur" class="text-secondary">ای میل (اختیاری)</span>
+                </label>
+                <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
+                       placeholder="name@example.com" value="{{ old('email', $user->email) }}">
+                @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
             <div class="col-md-4">
                 <label class="form-label d-flex justify-content-between align-items-center">

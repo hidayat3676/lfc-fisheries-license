@@ -56,6 +56,7 @@ class ProfileController extends Controller
     {
         $data = $request->validate([
             'full_name' => ['required', 'string', 'max:120'],
+            'email' => ['nullable', 'email', 'max:190', Rule::unique('users', 'email')->ignore($user->id)],
             'father_name' => ['nullable', 'string', 'max:120'],
             'cnic' => ['nullable', 'string', 'max:20'],
             'dob' => ['nullable', 'date', 'before:today'],
@@ -67,10 +68,14 @@ class ProfileController extends Controller
             'district_id' => ['nullable', 'integer', 'exists:districts,id'],
         ]);
 
-        $user->update([
+        $userUpdates = [
             'name' => $data['full_name'],
             'mobile' => $data['mobile'],
-        ]);
+        ];
+        if ($request->exists('email')) {
+            $userUpdates['email'] = ! empty($data['email']) ? strtolower(trim($data['email'])) : null;
+        }
+        $user->update($userUpdates);
 
         $profile = $user->adminProfile()->updateOrCreate(
             ['user_id' => $user->id],
@@ -162,6 +167,7 @@ class ProfileController extends Controller
 
         $validator = Validator::make($input, [
             'full_name' => ['required', 'string', 'max:120'],
+            'email' => ['nullable', 'email', 'max:190', Rule::unique('users', 'email')->ignore($user->id)],
             'father_name' => ['required', 'string', 'max:120'],
             'cnic' => ['required', 'regex:/^\d{5}-\d{7}-\d$/'],
             'dob' => ['required', 'date', 'before:today'],
@@ -170,7 +176,7 @@ class ProfileController extends Controller
             'address' => ['required', 'string', 'max:255'],
             'residence_district_id' => ['required', 'integer', 'exists:districts,id'],
             'province' => ['required', 'string', 'max:80'],
-            'emergency_contact' => ['required', 'string', 'max:80'],
+            'emergency_contact' => ['nullable', 'string', 'max:80'],
             'profile_pic' => $profilePicRules,
         ], [
             'cnic.regex' => 'CNIC must be in format 12345-1234567-1.',
@@ -227,12 +233,16 @@ class ProfileController extends Controller
             Storage::disk('public')->delete($oldPhoto);
         }
 
-        $user->update([
+        $userUpdates = [
             'name' => $data['full_name'],
             'mobile' => $data['mobile'],
-        ]);
+        ];
+        if ($request->exists('email')) {
+            $userUpdates['email'] = ! empty($data['email']) ? strtolower(trim($data['email'])) : null;
+        }
+        $user->update($userUpdates);
 
-        $profileData = collect($data)->except(['mobile', 'profile_pic', 'photo'])->all();
+        $profileData = collect($data)->except(['email', 'mobile', 'profile_pic', 'photo'])->all();
         if ($photoPath) {
             $profileData['photo_path'] = $photoPath;
         }

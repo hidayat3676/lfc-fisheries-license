@@ -205,6 +205,7 @@ class PaymirService
         $voucherObject = [
             'dptPaymentID' => $dptPaymentId,
             'trackingNumber' => $trackingNumber,
+            'citizenName' => $citizen->citizenProfile->full_name ?: $citizen->name,
             'citizenCNIC' => $citizenCnic,
             'departmentName' => $departmentName,
             'serviceName' => $serviceName,

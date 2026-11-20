@@ -17,10 +17,11 @@ class AuthController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
-            'email' => ['nullable', 'email', 'max:190', 'unique:users,email'],
+            'email' => ['nullable', 'email', 'max:190'],
             'cnic' => ['required', 'string', 'regex:/^\d{5}-\d{7}-\d$/', 'unique:citizen_profiles,cnic'],
-            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
             'otp' => ['nullable', 'string', 'size:6'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+
         ], [
             'cnic.regex' => 'CNIC must be in format 12345-1234567-1.',
             'cnic.unique' => 'This CNIC is already registered.',
@@ -83,7 +84,6 @@ class AuthController extends Controller
             'cnic' => ['nullable', 'string'],
             'name' => ['nullable', 'string', 'max:120'],
             'otp' => ['nullable', 'string', 'size:6'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
         $email = ! empty($data['email']) ? strtolower(trim($data['email'])) : null;
@@ -105,7 +105,6 @@ class AuthController extends Controller
         $user = User::query()->create([
             'name' => $name ?: 'Citizen',
             'email' => $email,
-            'password' => $data['password'],
             'user_type' => User::TYPE_CITIZEN,
             'email_verified_at' => now(),
             'is_active' => true,
@@ -127,12 +126,14 @@ class AuthController extends Controller
     {
         $credentials = $request->validate([
             'email' => ['nullable', 'string'],
-            'cnic' => ['nullable', 'string'],
+            'cnic' => ['required', 'string'],
             'login' => ['nullable', 'string'],
             'password' => ['required', 'string'],
         ]);
 
-        $identifier = trim((string) ($credentials['login'] ?? $credentials['cnic'] ?? $credentials['email'] ?? ''));
+        $identifier = trim((string) ($credentials['login'] ?? 
+        $credentials['cnic'] ?? 
+        $credentials['email'] ?? ''));
         if ($identifier === '') {
             throw ValidationException::withMessages([
                 'cnic' => 'Please provide CNIC or email.',

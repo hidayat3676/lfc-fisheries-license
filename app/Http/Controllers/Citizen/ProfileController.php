@@ -26,6 +26,7 @@ class ProfileController extends Controller
     {
         $data = $request->validate([
             'full_name' => ['required', 'string', 'max:120'],
+            'email' => ['nullable', 'email', 'max:190', Rule::unique('users', 'email')->ignore($request->user()->id)],
             'father_name' => ['required', 'string', 'max:120'],
             'cnic' => ['required', 'regex:/^\d{5}-\d{7}-\d$/'],
             'dob' => ['required', 'date', 'before:today'],
@@ -41,10 +42,14 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
-        $user->update([
+        $userUpdates = [
             'name' => $data['full_name'],
             'mobile' => $data['mobile'],
-        ]);
+        ];
+        if ($request->exists('email')) {
+            $userUpdates['email'] = ! empty($data['email']) ? strtolower(trim($data['email'])) : null;
+        }
+        $user->update($userUpdates);
 
         $profileData = [
             'full_name' => $data['full_name'],
