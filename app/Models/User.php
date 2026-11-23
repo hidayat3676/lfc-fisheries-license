@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -30,6 +31,7 @@ class User extends Authenticatable
         'mobile',
         'password',
         'user_type',
+        'referred_by',
         'all_districts',
         'is_active',
         'pattern_lock_enabled',
@@ -107,6 +109,11 @@ class User extends Authenticatable
     public function adminProfile(): HasOne
     {
         return $this->hasOne(AdminProfile::class);
+    }
+
+    public function referredBy(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'referred_by');
     }
 
     public function hasModuleAction(string $moduleKey, string $action): bool

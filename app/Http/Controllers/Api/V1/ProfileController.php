@@ -27,6 +27,8 @@ class ProfileController extends Controller
             $profile = $user->citizenProfile;
         }
 
+        $user->load('referredBy:id,name');
+
         return response()->json([
             'user' => [
                 'id' => $user->id,
@@ -34,6 +36,8 @@ class ProfileController extends Controller
                 'email' => $user->email,
                 'mobile' => $user->mobile,
                 'user_type' => $user->user_type,
+                'referred_by' => $user->referred_by,
+                'referred_by_name' => $user->referredBy?->name,
                 'profile_complete' => $user->isAdminStaff() ? true : $user->hasCompleteCitizenProfile(),
             ],
             'profile' => $profile,

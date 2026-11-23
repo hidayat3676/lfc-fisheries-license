@@ -9,10 +9,28 @@ use App\Services\OtpService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    public function staffUsers(): JsonResponse
+    {
+        $staffUsers = User::query()
+            ->where('is_active', true)
+            ->whereIn('user_type', [User::TYPE_SUPER_ADMIN, User::TYPE_ADMIN, User::TYPE_EXECUTIVE])
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn (User $u) => [
+                'id' => $u->id,
+                'name' => $u->name,
+            ]);
+
+        return response()->json([
+            'data' => $staffUsers,
+        ]);
+    }
+
     public function register(Request $request, OtpService $otpService): JsonResponse
     {
         $data = $request->validate([
@@ -21,6 +39,15 @@ class AuthController extends Controller
             'cnic' => ['required', 'string', 'regex:/^\d{5}-\d{7}-\d$/', 'unique:citizen_profiles,cnic'],
             'otp' => ['nullable', 'string', 'size:6'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'referred_by' => [
+                'nullable',
+                'integer',
+                Rule::exists('users', 'id')->whereIn('user_type', [
+                    User::TYPE_SUPER_ADMIN,
+                    User::TYPE_ADMIN,
+                    User::TYPE_EXECUTIVE,
+                ]),
+            ],
 
         ], [
             'cnic.regex' => 'CNIC must be in format 12345-1234567-1.',
@@ -46,6 +73,7 @@ class AuthController extends Controller
                 'email' => $email,
                 'password' => $data['password'],
                 'user_type' => User::TYPE_CITIZEN,
+                'referred_by' => $data['referred_by'] ?? null,
                 'email_verified_at' => now(),
                 'is_active' => true,
                 'all_districts' => false,
@@ -66,6 +94,7 @@ class AuthController extends Controller
         cache()->put('api_register:'.$email, [
             'name' => $data['name'],
             'cnic' => $data['cnic'],
+            'referred_by' => $data['referred_by'] ?? null,
         ], now()->addMinutes(30));
 
         return response()->json([
@@ -84,6 +113,15 @@ class AuthController extends Controller
             'cnic' => ['nullable', 'string'],
             'name' => ['nullable', 'string', 'max:120'],
             'otp' => ['nullable', 'string', 'size:6'],
+            'referred_by' => [
+                'nullable',
+                'integer',
+                Rule::exists('users', 'id')->whereIn('user_type', [
+                    User::TYPE_SUPER_ADMIN,
+                    User::TYPE_ADMIN,
+                    User::TYPE_EXECUTIVE,
+                ]),
+            ],
         ]);
 
         $email = ! empty($data['email']) ? strtolower(trim($data['email'])) : null;
@@ -97,6 +135,7 @@ class AuthController extends Controller
 
         $name = is_array($cached) ? ($cached['name'] ?? null) : ($data['name'] ?? $cached);
         $cnic = is_array($cached) ? ($cached['cnic'] ?? null) : ($data['cnic'] ?? null);
+        $referredBy = is_array($cached) ? ($cached['referred_by'] ?? ($data['referred_by'] ?? null)) : ($data['referred_by'] ?? null);
 
         if (! empty($data['otp']) && $email) {
             $otpService->verify($email, EmailOtp::PURPOSE_REGISTER, $data['otp']);
@@ -106,6 +145,7 @@ class AuthController extends Controller
             'name' => $name ?: 'Citizen',
             'email' => $email,
             'user_type' => User::TYPE_CITIZEN,
+            'referred_by' => $referredBy,
             'email_verified_at' => now(),
             'is_active' => true,
             'all_districts' => false,
@@ -248,6 +288,8 @@ class AuthController extends Controller
      */
     private function userPayload(User $user): array
     {
+        $user->loadMissing(['citizenProfile', 'referredBy:id,name']);
+
         return [
             'id' => $user->id,
             'name' => $user->name,
@@ -255,6 +297,8 @@ class AuthController extends Controller
             'cnic' => $user->citizenProfile?->cnic,
             'mobile' => $user->mobile,
             'user_type' => $user->user_type,
+            'referred_by' => $user->referred_by,
+            'referred_by_name' => $user->referredBy?->name,
             'profile_complete' => $user->hasCompleteCitizenProfile(),
             'pattern_lock_enabled' => (bool) $user->pattern_lock_enabled,
             'has_pattern_lock' => $user->hasPatternLock(),

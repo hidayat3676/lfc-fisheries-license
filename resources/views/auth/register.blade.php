@@ -127,7 +127,7 @@
                     </div>
 
                     <!-- Profile Picture (For Digital Licence Card) -->
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <label class="form-label text-dark fw-semibold small mb-1 d-flex justify-content-between align-items-center" for="photo">
                             <span>Profile Picture <span class="text-muted fw-normal">(For Licence Card)</span></span>
                             <span dir="rtl" lang="ur" class="text-secondary">تصویر (لائسنس کارڈ کے لیے)</span>
@@ -138,6 +138,26 @@
                         </div>
                         <div class="form-text small text-secondary mt-1">Clear face photo for your digital licence card (Max 2MB).</div>
                         @error('photo') <div class="invalid-feedback d-block small mt-1">{{ $message }}</div> @enderror
+                    </div>
+
+                    <!-- Referred By (Optional) -->
+                    <div class="mb-4">
+                        <label class="form-label text-dark fw-semibold small mb-1 d-flex justify-content-between align-items-center" for="referred_by">
+                            <span>Referred By <span class="text-muted fw-normal">(Optional)</span></span>
+                            <span dir="rtl" lang="ur" class="text-secondary">حوالہ / ریفرڈ بائی (اختیاری)</span>
+                        </label>
+                        <div class="input-group input-aquatic-group">
+                            <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                            <select id="referred_by" name="referred_by" class="form-select @error('referred_by') is-invalid @enderror">
+                                <option value="">-- Select Staff Member (Optional) --</option>
+                                @foreach (($staffUsers ?? collect()) as $staff)
+                                    <option value="{{ $staff->id }}" @selected(old('referred_by') == $staff->id)>
+                                        {{ $staff->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        @error('referred_by') <div class="invalid-feedback d-block small mt-1">{{ $message }}</div> @enderror
                     </div>
 
                     <!-- Submit Button -->

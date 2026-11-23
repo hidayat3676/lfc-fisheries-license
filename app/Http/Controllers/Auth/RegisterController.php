@@ -9,13 +9,21 @@ use App\Services\OtpService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class RegisterController extends Controller
 {
     public function show(): View
     {
-        return view('auth.register');
+        $staffUsers = User::query()
+            ->where('is_active', true)
+            ->whereIn('user_type', [User::TYPE_SUPER_ADMIN, User::TYPE_ADMIN, User::TYPE_EXECUTIVE])
+            ->with('adminProfile:id,user_id,designation_label')
+            ->orderBy('name')
+            ->get(['id', 'name', 'user_type']);
+
+        return view('auth.register', compact('staffUsers'));
     }
 
     public function sendOtp(Request $request, OtpService $otpService): RedirectResponse
@@ -26,6 +34,15 @@ class RegisterController extends Controller
             'cnic' => ['required', 'string', 'regex:/^\d{5}-\d{7}-\d$/', 'unique:citizen_profiles,cnic'],
             'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'referred_by' => [
+                'nullable',
+                'integer',
+                Rule::exists('users', 'id')->whereIn('user_type', [
+                    User::TYPE_SUPER_ADMIN,
+                    User::TYPE_ADMIN,
+                    User::TYPE_EXECUTIVE,
+                ]),
+            ],
         ], [
             'cnic.regex' => 'CNIC must be in format 12345-1234567-1.',
             'cnic.unique' => 'This CNIC is already registered.',
@@ -51,6 +68,7 @@ class RegisterController extends Controller
                 'email' => $email,
                 'password' => $data['password'],
                 'user_type' => User::TYPE_CITIZEN,
+                'referred_by' => $data['referred_by'] ?? null,
                 'email_verified_at' => now(),
                 'is_active' => true,
                 'all_districts' => false,
@@ -75,6 +93,7 @@ class RegisterController extends Controller
             'email' => $email,
             'cnic' => $data['cnic'],
             'photo_path' => $photoPath,
+            'referred_by' => $data['referred_by'] ?? null,
             'expires_at' => $payload['expires_at'],
             'resend_in_seconds' => $payload['resend_in_seconds'],
         ]);
@@ -123,6 +142,7 @@ class RegisterController extends Controller
             'email' => $session['email'] ?? null,
             'password' => $data['password'],
             'user_type' => User::TYPE_CITIZEN,
+            'referred_by' => $session['referred_by'] ?? null,
             'email_verified_at' => now(),
             'is_active' => true,
             'all_districts' => false,
