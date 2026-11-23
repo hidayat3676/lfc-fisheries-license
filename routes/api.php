@@ -32,7 +32,6 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::get('/auth/staff-users', [AuthController::class, 'staffUsers']);
-    Route::get('/staff-users', [AuthController::class, 'staffUsers']);
     Route::post('/auth/register', [AuthController::class, 'register']);
     Route::post('/auth/verify-otp', [AuthController::class, 'verifyOtp']);
     Route::post('/auth/login', [AuthController::class, 'login']);

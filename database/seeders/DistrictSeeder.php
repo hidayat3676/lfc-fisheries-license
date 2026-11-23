@@ -179,5 +179,9 @@ class DistrictSeeder extends Seeder
                 $attributes
             );
         }
+
+        District::query()
+            ->whereNotIn('name', self::DISTRICTS)
+            ->delete();
     }
 }
