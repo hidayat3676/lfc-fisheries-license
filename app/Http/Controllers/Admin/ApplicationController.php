@@ -86,7 +86,6 @@ class ApplicationController extends Controller
             'licensingDistricts' => $licensingDistricts,
             'paymentMethods' => [
                 '1bill' => '1Bill / PAYMIR PSID (Online Payment)',
-                'counter_cash' => 'Cash (Counter Cash Payment)',
             ],
         ]);
     }
@@ -247,7 +246,7 @@ class ApplicationController extends Controller
                 'currency' => $category->currency,
                 'status' => $initialStatus,
                 'payment_method' => $data['payment_method'],
-                'payment_reference' => $data['payment_reference'] ?? ($data['payment_method'] === 'counter_cash' ? 'COUNTER-CASH-'.now()->format('YmdHis') : null),
+                'payment_reference' => $data['payment_reference'] ?? null,
                 'payment_receipt_path' => $receiptPath,
                 'psid_code' => null,
             ]);

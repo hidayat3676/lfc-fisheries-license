@@ -95,7 +95,6 @@ class ApplicationController extends Controller
             'categories' => $categories,
             'paymentMethods' => [
                 '1bill' => '1Bill / PAYMIR PSID (Online Payment)',
-                'counter_cash' => 'Cash',
             ],
         ]);
     }
@@ -161,10 +160,6 @@ class ApplicationController extends Controller
             throw ValidationException::withMessages([
                 'reservoir' => 'You already have a valid active licence for this water body. Re-applying is not allowed until your current licence expires.',
             ]);
-        }
-
-        if ($data['payment_method'] === Application::PAYMENT_METHOD_CASH) {
-            $data['payment_method'] = Application::PAYMENT_METHOD_COUNTER_CASH;
         }
 
         $isSeasonal = $category->duration_type === 'seasonal'

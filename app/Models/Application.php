@@ -84,8 +84,6 @@ class Application extends Model
             self::PAYMENT_METHOD_1BILL,
             self::PAYMENT_METHOD_PAYMIR,
             self::PAYMENT_METHOD_ONLINE_PAYMENT,
-            self::PAYMENT_METHOD_COUNTER_CASH,
-            self::PAYMENT_METHOD_CASH,
         ];
     }
 

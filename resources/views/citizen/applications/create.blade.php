@@ -145,12 +145,6 @@
                     </div>
                 </div>
 
-                <div class="mb-3" x-show="method === 'counter_cash' || method === 'cash'">
-                    <div class="alert alert-secondary small mb-0 rounded-3">
-                        <i class="bi bi-cash-coin me-1"></i> Pay cash at the nearest Fisheries Office counter for verification and licence issuance.
-                    </div>
-                </div>
-
                 <div class="form-check mb-4 pt-2 border-top">
                     <input class="form-check-input" type="checkbox" name="accept_terms" value="1" id="accept_terms" required>
                     <label class="form-check-label small" for="accept_terms">

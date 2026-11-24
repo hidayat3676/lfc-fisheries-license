@@ -60,9 +60,7 @@ class ApplicationController extends Controller
             'accept_terms' => ['accepted'],
         ]);
 
-        $method = $data['payment_method'] === Application::PAYMENT_METHOD_CASH
-            ? Application::PAYMENT_METHOD_COUNTER_CASH
-            : $data['payment_method'];
+        $method = $data['payment_method'];
 
         $category = LicenseCategory::query()->findOrFail($data['category_id']);
         $categoryType = $category->type ?: LicenseCategory::TYPE_NON_TROUT;

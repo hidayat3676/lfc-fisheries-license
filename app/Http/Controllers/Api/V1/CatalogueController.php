@@ -137,7 +137,6 @@ class CatalogueController extends Controller
                 'closed_seasons' => $closedSeasons,
                 'payment_methods' => [
                     ['key' => '1bill', 'label' => '1Bill / PAYMIR PSID'],
-                    ['key' => 'cash', 'label' => 'Cash'],
                 ],
             ],
         ]);
