@@ -55,6 +55,8 @@ class WaterBodyExcelSeeder extends Seeder
         $rows = $this->excelWaterBodies();
 
         DB::transaction(function () use ($rows, $hasLicenseTypeColumn, $hasImagePathColumn) {
+            $seededIds = [];
+
             foreach ($rows as $index => $item) {
                 $district = $this->resolveDistrict($item['district']);
 
@@ -108,13 +110,21 @@ class WaterBodyExcelSeeder extends Seeder
                     );
                 }
 
-                Reservoir::query()->updateOrCreate(
+                $reservoir = Reservoir::query()->updateOrCreate(
                     [
                         'district_id' => $district->id,
                         'name' => $item['name'],
                     ],
                     $payload
                 );
+
+                $seededIds[] = $reservoir->id;
+            }
+
+            if (! empty($seededIds)) {
+                Reservoir::query()
+                    ->whereNotIn('id', $seededIds)
+                    ->delete();
             }
         });
     }

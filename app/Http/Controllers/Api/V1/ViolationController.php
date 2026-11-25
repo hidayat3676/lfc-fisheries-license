@@ -59,15 +59,17 @@ class ViolationController extends Controller
             ->where('is_active', true)
             ->value('id');
 
-        $report = DB::transaction(function () use ($request, $data, $officeId) {
+        $user = $request->user() ?? auth('sanctum')->user();
+
+        $report = DB::transaction(function () use ($request, $data, $officeId, $user) {
             $year = now()->format('Y');
             $count = ViolationReport::query()->whereYear('created_at', $year)->count() + 1;
 
             $report = ViolationReport::query()->create([
                 'report_no' => sprintf('VR-%s-%05d', $year, $count),
-                'reporter_user_id' => $request->user()?->id,
-                'reporter_name' => $data['reporter_name'] ?? $request->user()?->name,
-                'reporter_phone' => $data['reporter_phone'] ?? $request->user()?->mobile,
+                'reporter_user_id' => $user?->id,
+                'reporter_name' => $data['reporter_name'] ?? $user?->name,
+                'reporter_phone' => $data['reporter_phone'] ?? $user?->mobile,
                 'district_id' => $data['district_id'],
                 'office_id' => $officeId,
                 'reservoir_id' => $data['reservoir_id'] ?? null,
