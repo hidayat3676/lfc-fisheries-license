@@ -157,11 +157,6 @@
                                 <a href="{{ route('catalogue.show', $item) }}" class="btn btn-sm btn-outline-secondary btn-chip">
                                     <i class="bi bi-info-circle me-1"></i>Details
                                 </a>
-                                @if ($mapUrl)
-                                    <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary btn-chip" title="Open in Google Maps">
-                                        <i class="bi bi-geo-alt-fill me-1"></i>Map
-                                    </a>
-                                @endif
                             </div>
 
                             @if ($item->allowsELicence())

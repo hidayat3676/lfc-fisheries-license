@@ -79,14 +79,14 @@
 
                 <div class="mb-3">
                     <label class="form-label fw-semibold d-flex justify-content-between align-items-center" for="category_id">
-                        <span>Licence Category &amp; Duration <span class="text-danger">*</span></span>
-                        <span dir="rtl" lang="ur" class="text-secondary">لائسنس کی قسم اور مدت <span class="text-danger">*</span></span>
+                        <span>Licence Category <span class="text-danger">*</span></span>
+                        <span dir="rtl" lang="ur" class="text-secondary">لائسنس کی قسم <span class="text-danger">*</span></span>
                     </label>
                     <select name="category_id" id="category_id" class="form-select form-select-lg @error('category_id') is-invalid @enderror" required onchange="handleCategoryChange()">
                         <option value="">-- Select Licence Category / لائسنس کی قسم منتخب کریں --</option>
                         @foreach ($categories as $category)
                             <option value="{{ $category->id }}" @selected(old('category_id') == $category->id)>
-                                {{ $category->name }}{{ $category->urdu_name ? ' ('.$category->urdu_name.')' : '' }} — {{ $category->feeLabel() }} ({{ $category->duration_days ? $category->duration_days.' Days' : ucfirst($category->duration_type) }})
+                                {{ $category->name }}{{ $category->urdu_name ? ' ('.$category->urdu_name.')' : '' }} — {{ $category->feeLabel() }}
                             </option>
                         @endforeach
                     </select>
@@ -175,7 +175,6 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Category</th>
-                                <th>Duration</th>
                                 <th class="text-end">Fee (PKR)</th>
                             </tr>
                         </thead>
@@ -187,11 +186,6 @@
                                         @if ($cat->max_fish_limit)
                                             <div class="text-muted" style="font-size: 0.7rem;">Limit: {{ $cat->max_fish_limit }} fish/day</div>
                                         @endif
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-secondary-subtle text-dark border" style="font-size:0.7rem">
-                                            {{ $cat->duration_days ? $cat->duration_days.' Days' : 'Fixed' }}
-                                        </span>
                                     </td>
                                     <td class="text-end font-monospace fw-bold text-success">
                                         {{ number_format((float) $cat->fee_amount, 0) }} {{ $cat->currency }}
@@ -358,12 +352,6 @@
                 ? 'text-bg-info text-dark'
                 : (item.trout_type === 'mixed' ? 'text-bg-warning text-dark' : 'text-bg-secondary');
 
-            const mapBtn = item.map_url
-                ? `<a href="${item.map_url}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.75rem;" title="Open in Google Maps (${item.lat ?? ''}, ${item.lng ?? ''})">
-                       <i class="bi bi-geo-alt-fill me-1"></i>Google Map
-                   </a>`
-                : `<span class="text-muted" style="font-size: 0.75rem;"><i class="bi bi-geo-alt me-1"></i>No coordinates</span>`;
-
             const licensePermitsRow = item.license_type
                 ? `<div class="ps-3 mt-1 text-secondary" style="font-size: 0.78rem;">
                        <span class="fw-semibold text-dark"><i class="bi bi-card-checklist text-rflms me-1"></i>License / Permits:</span>
@@ -375,7 +363,6 @@
                 <li class="py-2 border-bottom border-light-subtle">
                     <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
                         <span class="fw-semibold text-dark"><i class="bi bi-water text-rflms me-1"></i>${item.name}</span>
-                        ${mapBtn}
                     </div>
                     <div class="d-flex flex-wrap align-items-center gap-1 ps-3">
                         <span class="badge text-bg-white border text-secondary fw-normal">${item.type}</span>

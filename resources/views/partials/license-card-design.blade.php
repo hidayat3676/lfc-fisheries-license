@@ -68,6 +68,7 @@
         justify-content: center;
         flex-shrink: 0;
         padding: 3px;
+        overflow: hidden;
     }
 
     .kpf-emblem-circle img {
@@ -350,12 +351,12 @@
 <div class="kpf-permit-sheet">
     <!-- ================= FRONT CARD ================= -->
     <div class="kpf-card">
-        <img src="{{ asset('images/logo-2.png') }}" alt="" class="kpf-card-watermark">
+        <img src="{{ asset('images/fishries-logo-new.jpeg') }}" alt="" class="kpf-card-watermark">
 
         <div class="kpf-card-header">
             <div class="d-flex align-items-center gap-3">
                 <div class="kpf-emblem-circle">
-                    <img src="{{ asset('images/logo-2.png') }}" alt="KP Fisheries">
+                    <img src="{{ asset('images/fishries-logo-new.jpeg') }}" alt="KP Fisheries">
                 </div>
                 <div>
                     <div class="kpf-header-title">KHYBER PAKHTUNKHWA</div>
@@ -385,14 +386,9 @@
 
                 <!-- Center: Permit & Holder Details -->
                 <div class="flex-grow-1" style="min-width: 220px;">
-                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-1 mb-2">
-                        <div>
-                            <div class="kpf-label">LICENSE REFERENCE NO.</div>
-                            <div class="kpf-ref-badge">{{ $license->license_no }}</div>
-                        </div>
-                        <div class="kpf-issued-top">
-                            Issued: {{ $issueDateStr }}
-                        </div>
+                    <div class="mb-2">
+                        <div class="kpf-label">LICENSE REFERENCE NO.</div>
+                        <div class="kpf-ref-badge">{{ $license->license_no }}</div>
                     </div>
 
                     <div class="mb-2">
@@ -431,7 +427,7 @@
                             src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data={{ urlencode($verifyUrl) }}"
                             alt="QR Code"
                         >
-                        <img src="{{ asset('images/logo-2.png') }}" alt="" class="kpf-qr-logo">
+                        <img src="{{ asset('images/fishries-logo-new.jpeg') }}" alt="" class="kpf-qr-logo">
                     </div>
                     <div class="kpf-scan-caption">SCAN TO VERIFY</div>
                 </div>
@@ -470,7 +466,7 @@
 
     <!-- ================= BACK CARD ================= -->
     <div class="kpf-card">
-        <img src="{{ asset('images/logo-2.png') }}" alt="" class="kpf-card-watermark">
+        <img src="{{ asset('images/fishries-logo-new.jpeg') }}" alt="" class="kpf-card-watermark">
 
         <div class="kpf-back-strip"></div>
 
@@ -490,7 +486,7 @@
             <div class="pt-3 border-top d-flex justify-content-between align-items-end flex-wrap gap-3">
                 <div class="d-flex align-items-center gap-2">
                     <div class="kpf-emblem-circle" style="width: 40px; height: 40px;">
-                        <img src="{{ asset('images/logo-2.png') }}" alt="KP Crest">
+                        <img src="{{ asset('images/fishries-logo-new.jpeg') }}" alt="KP Crest">
                     </div>
                     <div>
                         <div class="fw-bold small text-uppercase" style="color: #0369a1; letter-spacing: 0.03em;">

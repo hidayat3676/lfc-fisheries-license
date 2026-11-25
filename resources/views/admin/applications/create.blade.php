@@ -535,12 +535,6 @@
                 ? 'text-bg-info text-dark'
                 : (item.trout_type === 'mixed' ? 'text-bg-warning text-dark' : 'text-bg-secondary');
 
-            const mapBtn = item.map_url
-                ? `<a href="${item.map_url}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.75rem;" title="Open in Google Maps (${item.lat ?? ''}, ${item.lng ?? ''})">
-                       <i class="bi bi-geo-alt-fill me-1"></i>Google Map
-                   </a>`
-                : `<span class="text-muted" style="font-size: 0.75rem;"><i class="bi bi-geo-alt me-1"></i>No coordinates</span>`;
-
             const licensePermitsRow = item.license_type
                 ? `<div class="ps-3 mt-1 text-secondary" style="font-size: 0.78rem;">
                        <span class="fw-semibold text-dark"><i class="bi bi-card-checklist text-rflms me-1"></i>License / Permits:</span>
@@ -552,7 +546,6 @@
                 <li class="py-2 border-bottom border-light-subtle">
                     <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
                         <span class="fw-semibold text-dark"><i class="bi bi-water text-rflms me-1"></i>${item.name}</span>
-                        ${mapBtn}
                     </div>
                     <div class="d-flex flex-wrap align-items-center gap-1 ps-3">
                         <span class="badge text-bg-white border text-secondary fw-normal">${item.type}</span>

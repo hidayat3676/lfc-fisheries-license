@@ -193,7 +193,6 @@
             <div class="category-card p-4 {{ $index === 0 ? 'featured-category' : '' }}">
                 <div class="d-flex align-items-center justify-content-between mb-3">
                     <span class="badge bg-rflms-light text-rflms border border-success border-opacity-25 uppercase">{{ $category->code }}</span>
-                    <span class="text-muted small"><i class="bi bi-clock me-1"></i>{{ $category->duration_days ? $category->duration_days . ' Days' : 'Fixed Period' }}</span>
                 </div>
 
                 <h3 class="h5 fw-bold text-dark mb-2">{{ $category->name }}</h3>
