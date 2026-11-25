@@ -97,6 +97,8 @@ Route::middleware(['auth', EnsureCitizen::class])->prefix('account')->name('citi
     Route::post('/applications', [CitizenApplicationController::class, 'store'])->name('applications.submit');
     Route::get('/applications/{application}', [CitizenApplicationController::class, 'show'])->name('applications.show');
     Route::get('/applications/{application}/success', [CitizenApplicationController::class, 'success'])->name('applications.success');
+    Route::get('/applications/{application}/payment-status', [CitizenApplicationController::class, 'paymentStatus'])->name('applications.payment-status');
+    Route::get('/applications-events', [CitizenApplicationController::class, 'events'])->name('applications.events');
     Route::get('/licenses/{license}/card', LicenseCardController::class)->name('licenses.card');
     Route::get('/water-bodies/{reservoir?}/apply', [CitizenApplicationController::class, 'create'])->name('applications.create');
     Route::post('/water-bodies/{reservoir?}/apply', [CitizenApplicationController::class, 'store'])->name('applications.store');
@@ -189,6 +191,7 @@ Route::middleware(['auth', EnsureStaff::class])->prefix('admin')->name('admin.')
     Route::middleware('module:applications,view')->group(function () {
         Route::get('/applications', [AdminApplicationController::class, 'index'])->name('applications.index');
         Route::get('/applications/{application}', [AdminApplicationController::class, 'show'])->name('applications.show');
+        Route::get('/applications/{application}/payment-status', [AdminApplicationController::class, 'paymentStatus'])->name('applications.payment-status');
         Route::get('/applications/{application}/card', [AdminApplicationController::class, 'card'])->name('applications.card');
     });
     Route::middleware('module:applications,approve')->group(function () {
@@ -199,6 +202,7 @@ Route::middleware(['auth', EnsureStaff::class])->prefix('admin')->name('admin.')
 
     Route::middleware('module:payments|applications|settings,view')->group(function () {
         Route::get('/paymir', [PaymirController::class, 'index'])->name('paymir.index');
+        Route::get('/paymir/events', [PaymirController::class, 'events'])->name('paymir.events');
         Route::post('/paymir/trace', [PaymirController::class, 'trace'])->name('paymir.trace');
         Route::post('/paymir/cancel', [PaymirController::class, 'cancel'])->name('paymir.cancel');
     });

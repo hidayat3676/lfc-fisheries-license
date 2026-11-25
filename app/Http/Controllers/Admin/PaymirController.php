@@ -194,5 +194,12 @@ class PaymirController extends Controller
             ->with('cancelled_dpt_id', $dptPaymentId)
             ->with('status', "PAYMIR Cancel Voucher ({$dptPaymentId}): {$responseMsg}");
     }
+
+    public function events(): \Illuminate\Http\JsonResponse
+    {
+        return response()->json([
+            'latest_event' => \Illuminate\Support\Facades\Cache::get('paymir_latest_paid_event'),
+        ]);
+    }
 }
 

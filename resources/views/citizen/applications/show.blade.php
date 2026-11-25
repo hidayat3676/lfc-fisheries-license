@@ -43,4 +43,10 @@
         </div>
     @endif
 </section>
+
+@include('partials.paymir-realtime-listener', [
+    'watchUrl' => route('citizen.applications.payment-status', $application),
+    'mode' => 'single',
+    'enabled' => ! $application->isPaid(),
+])
 @endsection

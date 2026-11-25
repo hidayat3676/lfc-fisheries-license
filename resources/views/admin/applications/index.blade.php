@@ -90,4 +90,10 @@
     </div>
 </div>
 <div class="mt-3">{{ $applications->links() }}</div>
+
+@include('partials.paymir-realtime-listener', [
+    'watchUrl' => route('admin.paymir.events'),
+    'mode' => 'feed',
+    'initialEventId' => data_get(\Illuminate\Support\Facades\Cache::get('paymir_latest_paid_event'), 'event_id'),
+])
 @endsection

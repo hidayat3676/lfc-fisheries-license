@@ -306,6 +306,22 @@ class ApplicationController extends Controller
         return view('admin.applications.show', compact('application'));
     }
 
+    public function paymentStatus(Request $request, Application $application): \Illuminate\Http\JsonResponse
+    {
+        $this->assertScoped($request, $application);
+        $application->loadMissing(['license', 'payments', 'voucher']);
+
+        $paid = $application->isPaid() || $application->voucher?->status === \App\Models\Voucher::STATUS_PAID;
+        $event = \Illuminate\Support\Facades\Cache::get('paymir_paid_app_'.$application->id);
+
+        return response()->json([
+            'paid' => $paid,
+            'status' => $application->status,
+            'license_no' => $application->license?->license_no,
+            'event' => $event,
+        ]);
+    }
+
     public function card(Request $request, Application $application): View
     {
         $this->assertScoped($request, $application);

@@ -9,8 +9,10 @@ use App\Services\ApplicationWorkflowService;
 use App\Services\PaymirService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 class PaymirWebhookController extends Controller
 {
@@ -248,6 +250,22 @@ class PaymirWebhookController extends Controller
                     : 'Auto-verified via PAYMIR payment confirmation.';
 
                 $license = $workflow->approve($application, null, $remarks);
+
+                $realtimeEvent = [
+                    'event_id' => (string) Str::uuid(),
+                    'application_id' => $application->id,
+                    'application_no' => $application->application_no,
+                    'user_id' => $application->user_id,
+                    'license_id' => $license->id,
+                    'license_no' => $license->license_no,
+                    'psid' => $application->psid_code,
+                    'dpt_payment_id' => $dptPaymentId,
+                    'transaction_id' => $transactionId,
+                    'paid_at' => now()->toIso8601String(),
+                ];
+                Cache::put('paymir_paid_app_'.$application->id, $realtimeEvent, now()->addHours(2));
+                Cache::put('paymir_paid_user_'.$application->user_id, $realtimeEvent, now()->addHours(2));
+                Cache::put('paymir_latest_paid_event', $realtimeEvent, now()->addHours(2));
 
                 // Log::info('PAYMIR updatePaymentDetail: application auto-approved and license issued.', [
                 //     'application_id' => $application->id,

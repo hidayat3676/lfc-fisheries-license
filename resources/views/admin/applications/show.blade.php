@@ -139,4 +139,10 @@
         @include('partials.license-card-design', ['license' => $application->license])
     </div>
 @endif
+
+@include('partials.paymir-realtime-listener', [
+    'watchUrl' => route('admin.applications.payment-status', $application),
+    'mode' => 'single',
+    'enabled' => ! $application->isPaid(),
+])
 @endsection

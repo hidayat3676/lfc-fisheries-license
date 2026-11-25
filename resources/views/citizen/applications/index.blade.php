@@ -81,4 +81,10 @@
         </div>
     </div>
 </section>
+
+@include('partials.paymir-realtime-listener', [
+    'watchUrl' => route('citizen.applications.events'),
+    'mode' => 'feed',
+    'initialEventId' => data_get(\Illuminate\Support\Facades\Cache::get('paymir_paid_user_'.auth()->id()), 'event_id'),
+])
 @endsection
