@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'brevo' => [
+        'key' => env('BREVO_API_KEY'),
+        'sender_email' => env('BREVO_SENDER_EMAIL', env('MAIL_FROM_ADDRESS', 'noreply@fisheries.kp.gov.pk')),
+        'sender_name' => env('BREVO_SENDER_NAME', env('MAIL_FROM_NAME', 'KP Fisheries E-License')),
+        'endpoint' => env('BREVO_API_URL', 'https://api.brevo.com/v3/smtp/email'),
+    ],
+
 ];

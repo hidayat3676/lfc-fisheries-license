@@ -11,6 +11,8 @@ use RuntimeException;
 
 class OtpService
 {
+    public function __construct(private ?BrevoMailService $brevo = null) {}
+
     public function issue(string $email, string $purpose): array
     {
         $email = strtolower(trim($email));
@@ -51,7 +53,12 @@ class OtpService
             'last_sent_at' => now(),
         ]);
 
-        Mail::to($email)->send(new OtpMail($code, $purpose, $ttl));
+        $brevo = $this->brevo ?? app(BrevoMailService::class);
+        $sentViaBrevo = $brevo->isConfigured() && $brevo->sendOtpEmail($email, $code, $purpose, $ttl);
+
+        if (! $sentViaBrevo) {
+            Mail::to($email)->send(new OtpMail($code, $purpose, $ttl));
+        }
 
         $payload = [
             'email' => $email,
