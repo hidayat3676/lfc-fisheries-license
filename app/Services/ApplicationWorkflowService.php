@@ -18,9 +18,29 @@ class ApplicationWorkflowService
     public function nextApplicationNo(): string
     {
         $year = now()->format('Y');
-        $count = Application::query()->whereYear('created_at', $year)->count() + 1;
+        $prefix = "APP-{$year}-";
 
-        return sprintf('APP-%s-%05d', $year, $count);
+        $latestNo = Application::query()
+            ->where('application_no', 'like', $prefix.'%')
+            ->orderByDesc('id')
+            ->value('application_no');
+
+        $latestSeq = 0;
+        if (is_string($latestNo) && preg_match('/^APP-'.preg_quote($year, '/').'-(\d+)$/', $latestNo, $matches)) {
+            $latestSeq = (int) $matches[1];
+        }
+
+        $seq = max(
+            $latestSeq + 1,
+            Application::query()->whereYear('created_at', $year)->count() + 1
+        );
+
+        do {
+            $candidate = sprintf('APP-%s-%05d', $year, $seq);
+            $seq++;
+        } while (Application::query()->where('application_no', $candidate)->exists());
+
+        return $candidate;
     }
 
     public function nextLicenseNo(?Application $application = null): string
