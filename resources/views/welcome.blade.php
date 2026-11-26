@@ -406,43 +406,220 @@
 </section>
 @endif
 
-<!-- How It Works Section -->
+<!-- How It Works / E-Licensing Journey Section -->
 <section id="how-it-works" class="container pb-5">
-    <div class="row mb-4">
-        <div class="col-lg-8">
-            <div class="section-header">
-                <div class="section-icon"><i class="bi bi-diagram-3"></i></div>
-                <div>
-                    <h2 class="h3 fw-bold mb-0">E-Licensing Journey</h2>
-                    <p class="text-secondary mb-0">Four seamless steps from application to instant field-verifiable PDF permit.</p>
-                </div>
+    <style>
+        .journey-showcase {
+            position: relative;
+            background: linear-gradient(180deg, #ffffff 0%, #f4faf7 100%);
+            border: 1px solid rgba(11, 110, 79, 0.12);
+            border-radius: 1.5rem;
+            padding: 2.5rem 1.75rem;
+            box-shadow: 0 12px 36px rgba(15, 23, 42, 0.05);
+            overflow: hidden;
+        }
+        .journey-showcase::before {
+            content: '';
+            position: absolute;
+            top: -80px;
+            right: -80px;
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(11, 110, 79, 0.08), transparent 70%);
+            pointer-events: none;
+        }
+        .journey-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.25rem;
+            position: relative;
+            z-index: 1;
+        }
+        @media (min-width: 768px) {
+            .journey-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (min-width: 992px) {
+            .journey-showcase {
+                padding: 3rem 2.5rem;
+            }
+            .journey-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 2rem;
+            }
+            .journey-card:not(:last-child)::after {
+                content: '';
+                position: absolute;
+                top: 2.35rem;
+                right: -1.65rem;
+                width: 1.35rem;
+                height: 1.35rem;
+                background-color: #0b6e4f;
+                -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='3' y1='12' x2='20' y2='12'/%3E%3Cpolyline points='14 6 20 12 14 18'/%3E%3C/svg%3E") center / contain no-repeat;
+                mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='3' y1='12' x2='20' y2='12'/%3E%3Cpolyline points='14 6 20 12 14 18'/%3E%3C/svg%3E") center / contain no-repeat;
+                opacity: 0.75;
+                z-index: 2;
+                pointer-events: none;
+                transition: transform 0.25s ease, opacity 0.25s ease;
+            }
+            .journey-card:not(:last-child):hover::after {
+                transform: translateX(3px);
+                opacity: 1;
+            }
+        }
+        .journey-card {
+            position: relative;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 1.15rem;
+            padding: 1.5rem 1.25rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.28s cubic-bezier(.4,0,.2,1), box-shadow 0.28s ease, border-color 0.28s ease;
+            z-index: 1;
+        }
+        .journey-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 18px 38px rgba(11, 110, 79, 0.12);
+            border-color: rgba(11, 110, 79, 0.35);
+        }
+        .journey-step-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.1rem;
+        }
+        .journey-num-pill {
+            width: 2.4rem;
+            height: 2.4rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0b6e4f, #064a35);
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(11, 110, 79, 0.28);
+            border: 3px solid #ffffff;
+            transition: transform 0.25s ease, background 0.25s ease;
+        }
+        .journey-card:hover .journey-num-pill {
+            transform: scale(1.1);
+            background: linear-gradient(135deg, #d4a017, #b8860b);
+            color: #0f172a;
+        }
+        .journey-icon-box {
+            width: 2.75rem;
+            height: 2.75rem;
+            border-radius: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            transition: transform 0.25s ease;
+        }
+        .journey-card:hover .journey-icon-box {
+            transform: rotate(-4deg) scale(1.06);
+        }
+        .journey-meta-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            padding: 0.28rem 0.65rem;
+            border-radius: 999px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            color: #475569;
+            margin-top: 1rem;
+            width: fit-content;
+        }
+    </style>
+
+    <div class="journey-showcase">
+        <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-4 pb-2">
+            <div>
+                <span class="badge rounded-pill px-3 py-1 mb-2 fw-semibold" style="background: rgba(11,110,79,0.1); color: #0b6e4f; letter-spacing: 0.05em;">
+                    <i class="bi bi-stars me-1"></i> HOW IT WORKS · 4 SIMPLE STEPS
+                </span>
+                <h2 class="h3 fw-bold mb-1 text-dark">E-Licensing Journey</h2>
+                <p class="text-secondary mb-0">From CNIC sign-up to an instant, QR-verified digital fishing permit.</p>
             </div>
+            <a href="{{ route('citizen.applications.apply') }}" class="btn btn-rflms btn-chip px-4">
+                <i class="bi bi-lightning-charge-fill"></i> Start Application
+            </a>
         </div>
-    </div>
-    <div class="stage-flow">
-        <div class="stage-item">
-            <span class="stage-num">Stage 1</span>
-            <div class="stage-icon"><i class="bi bi-person-check"></i></div>
-            <h3 class="h6 fw-bold">Citizen Registration</h3>
-            <p class="text-secondary small mb-0">Sign up using your Mobile / Email. Complete your profile with CNIC verification once.</p>
-        </div>
-        <div class="stage-item">
-            <span class="stage-num">Stage 2</span>
-            <div class="stage-icon"><i class="bi bi-geo-fill"></i></div>
-            <h3 class="h6 fw-bold">Pick Water Body</h3>
-            <p class="text-secondary small mb-0">Select your district, lake/river, and desired fishing licence duration &amp; category.</p>
-        </div>
-        <div class="stage-item">
-            <span class="stage-num">Stage 3</span>
-            <div class="stage-icon"><i class="bi bi-wallet-fill"></i></div>
-            <h3 class="h6 fw-bold">Fee Payment</h3>
-            <p class="text-secondary small mb-0">Pay online via 1Bill PSID or upload bank deposit proof directly through your dashboard.</p>
-        </div>
-        <div class="stage-item">
-            <span class="stage-num">Stage 4</span>
-            <div class="stage-icon"><i class="bi bi-qr-code-scan"></i></div>
-            <h3 class="h6 fw-bold">Get QR E-Licence</h3>
-            <p class="text-secondary small mb-0">District officers review &amp; issue your digital licence PDF equipped with encrypted QR verification.</p>
+
+        <div class="journey-grid">
+            <div class="journey-card">
+                <div>
+                    <div class="journey-step-top">
+                        <span class="journey-num-pill">01</span>
+                        <span class="journey-icon-box" style="background: #e8f5ef; color: #0b6e4f;">
+                            <i class="bi bi-person-vcard-fill"></i>
+                        </span>
+                    </div>
+                    <h3 class="h6 fw-bold text-dark mb-2">Citizen Registration</h3>
+                    <p class="text-secondary small mb-0">Sign up with your CNIC and password (email &amp; OTP optional) and complete your profile once.</p>
+                </div>
+                <span class="journey-meta-pill">
+                    <i class="bi bi-check2-circle text-success"></i> Quick CNIC Setup
+                </span>
+            </div>
+
+            <div class="journey-card">
+                <div>
+                    <div class="journey-step-top">
+                        <span class="journey-num-pill">02</span>
+                        <span class="journey-icon-box" style="background: #e0f2fe; color: #0284c7;">
+                            <i class="bi bi-geo-alt-fill"></i>
+                        </span>
+                    </div>
+                    <h3 class="h6 fw-bold text-dark mb-2">District &amp; Category</h3>
+                    <p class="text-secondary small mb-0">Select your district to view available water bodies and pick a Trout or Non-Trout licence category.</p>
+                </div>
+                <span class="journey-meta-pill">
+                    <i class="bi bi-water text-primary"></i> District-Wide Permit
+                </span>
+            </div>
+
+            <div class="journey-card">
+                <div>
+                    <div class="journey-step-top">
+                        <span class="journey-num-pill">03</span>
+                        <span class="journey-icon-box" style="background: #fef3c7; color: #b45309;">
+                            <i class="bi bi-credit-card-2-front-fill"></i>
+                        </span>
+                    </div>
+                    <h3 class="h6 fw-bold text-dark mb-2">1Bill / PAYMIR PSID</h3>
+                    <p class="text-secondary small mb-0">Receive an official PAYMIR PSID voucher instantly and pay via 1Bill, banking apps, or mobile wallets.</p>
+                </div>
+                <span class="journey-meta-pill">
+                    <i class="bi bi-shield-lock text-warning"></i> Online PSID Payment
+                </span>
+            </div>
+
+            <div class="journey-card">
+                <div>
+                    <div class="journey-step-top">
+                        <span class="journey-num-pill">04</span>
+                        <span class="journey-icon-box" style="background: #e0f2fe; color: #0369a1;">
+                            <i class="bi bi-qr-code-scan"></i>
+                        </span>
+                    </div>
+                    <h3 class="h6 fw-bold text-dark mb-2">Instant QR E-Licence</h3>
+                    <p class="text-secondary small mb-0">Once payment confirms, your licence is auto-verified in real time with a printable QR PDF card.</p>
+                </div>
+                <span class="journey-meta-pill">
+                    <i class="bi bi-patch-check-fill text-success"></i> Auto-Issued PDF
+                </span>
+            </div>
         </div>
     </div>
 </section>
